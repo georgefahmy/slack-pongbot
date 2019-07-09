@@ -16,13 +16,8 @@ class Command(BaseCommand):
     help = 'Runs slackbot'
 
     def handle(self, *args, **options):
-        from slackbot.bot import respond_to
-        from slackbot.bot import listen_to
-        from slackbot.bot import Bot
-        import sys
-        import re
-        import logging
-        import logging.config
+        from slackbot.bot import respond_to, listen_to, Bot
+        import sys, re, logging, logging.config
 
         begin_elo_at = 1000
         def current_time():
