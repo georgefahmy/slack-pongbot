@@ -1,2 +1,4 @@
 slackbot_settings.py
 db.sqlite3
+*.pyc
+*.DS_Store

@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('winner', models.CharField(max_length=200)),
                 ('loser', models.CharField(max_length=200)),
+                ('elo_rankings', models.IntegerField(default=1000)),
                 ('created_on', models.DateTimeField(verbose_name='created_on')),
                 ('modified_on', models.DateTimeField(verbose_name='modified_on')),
             ],
