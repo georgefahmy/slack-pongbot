@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('history', '0002_season'),
+        ('history', '0003_rankings'),
     ]
 
     operations = [
