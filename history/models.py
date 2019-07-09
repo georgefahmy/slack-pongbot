@@ -6,7 +6,6 @@ from django.db import models
 class Game(models.Model):
     winner = models.CharField(max_length=200)
     loser = models.CharField(max_length=200)
-    elo_ranking = models.IntegerField(default=1000)
     created_on = models.DateTimeField('created_on')
     modified_on = models.DateTimeField('modified_on')
 
