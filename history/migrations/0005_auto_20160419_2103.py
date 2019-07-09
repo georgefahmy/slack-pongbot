@@ -16,7 +16,7 @@ def migrate_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('history', '0003_season_season_number'),
+        ('history', '0004_season_season_number'),
     ]
 
     operations = [

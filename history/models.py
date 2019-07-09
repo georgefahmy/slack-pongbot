@@ -23,3 +23,11 @@ class Season(models.Model):
             return "Season {} (started on {} )".format(self.season_number, self.start_on.strftime('%Y/%m/%d'))
         else:
             return "Season {} (started on {}, ended on {} )".format(self.season_number, self.start_on.strftime('%Y/%m/%d'), self.end_on.strftime('%Y/%m/%d'))
+
+class Rankings(models.Model):
+    user = models.CharField(max_length=200)
+    ranking = models.IntegerField(default=1000)
+    created_on = models.DateTimeField('created_on')
+
+    def __str__(self):
+        return '{} has a ranking of {}'.format(self.user, self.ranking, self.created_on.strftime('%T, %d %b %Y'))
