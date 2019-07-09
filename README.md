@@ -14,8 +14,8 @@ Start by getting your bot's API Token:
 replace `<API-KEY>` with your bot's API-key
 
 ```
-git clone
-cd pongbot
+git clone https://github.com/georgefahmy/slack-pongbot.git
+cd slack-pongbot
 pip install --ignore-installed -r requirements.txt
 echo 'API_TOKEN = "<API-KEY>"' > slackbot_settings.py
 ./manage.py migrate
