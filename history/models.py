@@ -28,6 +28,3 @@ class Rankings(models.Model):
     user = models.CharField(max_length=200)
     ranking = models.IntegerField(default=1000)
     created_on = models.DateTimeField('created_on')
-
-    def __str__(self):
-        return '{} has a ranking of {}'.format(self.user, self.ranking, self.created_on.strftime('%T, %d %b %Y'))
