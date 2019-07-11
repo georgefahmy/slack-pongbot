@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
-from history.models import Game, Season
+from history.models import Game, Season, Rankings
 from datetime import datetime, date
 from pytz import timezone as tzone
 from collections import Counter
@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db.models import Q
 from time import sleep
 
-default_start = date(2019, 7, 1)
+default_start = date(2019, 6, 1)
 trend_size = 30
 
 class Command(BaseCommand):
@@ -29,7 +29,6 @@ class Command(BaseCommand):
         def _get_elo(start_date):
             #get games from ORM
             games = Game.objects.filter(created_on__gt=start_date).order_by('created_on')
-
             #instantiate rankings object
             rankings = {}
             for game in games:
@@ -202,7 +201,7 @@ class Command(BaseCommand):
         def _leaderboard(message,seasoned=False):
 
 
-            STATS_SIZE_LIMIT = 1000
+            STATS_SIZE_LIMIT = 10000
 
             active_season , range_start_date = get_active_season(seasoned)
 
@@ -445,10 +444,97 @@ class Command(BaseCommand):
             message.send('https://media.giphy.com/media/3o7TKTeL57EJdYFKBW/giphy.gif')
 
 ##########
-        @listen_to('^pb result (<@.*) ([0-9])-([0-9])',re.IGNORECASE)
-        @listen_to('^pb results (<@.*) ([0-9])-([0-9])',re.IGNORECASE)
-        @listen_to('^pb result (<@.*) ([0-9]) ([0-9])',re.IGNORECASE)
-        @listen_to('^pb results (<@.*) ([0-9]) ([0-9])',re.IGNORECASE)
+        def get_stats(winner_name,loser_name,time):
+            elo_start = 1000
+
+            winner = Rankings.objects.filter(user = winner_name)
+            loser = Rankings.objects.filter(user = loser_name)
+
+            if not winner:
+                winner = Rankings.objects.create(user=winner_name,ranking=elo_start,wins=0,losses=0,total=0,created_on=time)
+                winner = Rankings.objects.filter(user = winner_name)
+
+            if not loser:
+                loser = Rankings.objects.create(user=loser_name,ranking=elo_start,wins=0,losses=0,total=0,created_on=time)
+                loser = Rankings.objects.filter(user = loser_name)
+
+            return winner, loser
+##########
+        def update_stats(winner, loser):
+
+            old_winner_elo = winner.values('ranking')[0]['ranking']
+            old_winner_wins = winner.values('wins')[0]['wins']
+            old_winner_total = winner.values('total')[0]['total']
+
+            old_loser_elo = loser.values('ranking')[0]['ranking']
+            old_loser_losses = loser.values('losses')[0]['losses']
+            old_loser_total = loser.values('total')[0]['total']
+
+
+            ranking_results = rate_1vs1(old_winner_elo,old_loser_elo)
+
+            new_winner_elo = int(round(ranking_results[0],0))
+            new_loser_elo = int(round(ranking_results[1],0))
+            winner_wins = old_winner_wins+1
+            winner_total = old_winner_total+1
+
+            loser_losses = old_loser_losses+1
+            loser_total = old_loser_total+1
+
+            winner.update(ranking=new_winner_elo)
+            winner.update(wins=winner_wins)
+            winner.update(total=winner_total)
+
+            loser.update(ranking=new_loser_elo)
+            loser.update(losses=loser_losses)
+            loser.update(total=loser_total)
+
+
+            winner_diff = new_winner_elo - old_winner_elo
+            loser_diff = new_loser_elo - old_loser_elo
+
+            return ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total
+##########
+        def rankings_order():
+            list_of_rankings = Rankings.objects.values('user','ranking').order_by('-ranking')
+            logging.debug(list_of_rankings[0])
+            return list_of_rankings
+##########
+        @listen_to('^pb update rankings')
+        def create_rankings(message):
+            time = current_time()
+            STATS_SIZE_LIMIT = 1000
+            games = Game.objects.filter(created_on__gt=default_start)
+
+            players = list(set(list(games.values_list('winner',flat=True).distinct()) + list(games.values_list('loser',flat=True).distinct())))
+            stats_by_user = {}
+            elo_rankings = _get_elo(default_start)
+
+            for player in players:
+                stats_by_user[player] = { 'name': player, 'elo': elo_rankings[player], 'wins' : 0, 'losses': 0, 'total': 0 }
+
+            for game in games.order_by('-created_on')[:STATS_SIZE_LIMIT]:
+                stats_by_user[game.winner]['wins']+=1
+                stats_by_user[game.winner]['total']+=1
+                stats_by_user[game.loser]['losses']+=1
+                stats_by_user[game.loser]['total']+=1
+
+            for player in stats_by_user:
+                stats_by_user[player]['win_pct'] =  round(stats_by_user[player]['wins'] * 1.0 / stats_by_user[player]['total'],2)*100
+
+            for player in stats_by_user:
+                ranking = Rankings.objects.create(user=stats_by_user[player]['name'],ranking=stats_by_user[player]['elo'],created_on=time)
+
+            stats_by_user = sorted(stats_by_user.items())
+
+            stats_str = "\n ".join([  " * {}({}): {}/{} ({}%)".format(stats[1]['name'],stats[1]['elo'],stats[1]['wins'],stats[1]['losses'],stats[1]['win_pct'])  for stats in stats_by_user ])
+            stats_str = "{}".format(stats_str)
+
+##########
+        @listen_to('^pb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
+        @listen_to('^pb results (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
+        @listen_to('^pb result (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
+        @listen_to('^pb results (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
         def results(message, opponentname, wins, losses ):
             def won2(message, opponentname):
                 time = current_time()
@@ -466,20 +552,10 @@ class Command(BaseCommand):
 
                 active_season , range_start_date = get_active_season(True)
 
-                winner_old_elo = 1000
-                loser_old_elo = 1000
-
-                elo_rankings = _get_elo(range_start_date)
-                if sender in elo_rankings:
-                    winner_old_elo = elo_rankings[sender]
-                if opponentname in elo_rankings:
-                    loser_old_elo = elo_rankings[opponentname]
-
                 newgame = Game.objects.create(winner=sender,loser=opponentname,created_on=time,modified_on=time)
-
-                elo_rankings = _get_elo(range_start_date)
-                winner_elo_diff = elo_rankings[sender] - winner_old_elo
-                loser_elo_diff = elo_rankings[opponentname] - loser_old_elo
+                winner, loser = get_stats(sender,opponentname,time)
+                ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
+                rankings_order()
 
             ##########
             def loss2(message, opponentname):
@@ -498,17 +574,10 @@ class Command(BaseCommand):
                 active_season , range_start_date = get_active_season(True)
 
                 newgame = Game.objects.create(winner=opponentname,loser=sender,created_on=time,modified_on=time)
-                winner_old_elo = 1000
-                loser_old_elo = 1000
+                old_winner_elo, old_loser_elo = get_stats(opponentname,sender,time)
+                ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(old_winner_elo, old_loser_elo)
+                rankings_order()
 
-                elo_rankings = _get_elo(range_start_date)
-                if sender in elo_rankings:
-                    loser_old_elo = elo_rankings[sender]
-                if opponentname in elo_rankings:
-                    winner_old_elo = elo_rankings[opponentname]
-                elo_rankings = _get_elo(range_start_date)
-                winner_elo_diff = elo_rankings[opponentname] - winner_old_elo
-                loser_elo_diff = elo_rankings[sender] - loser_old_elo
             ##########
 
             logging.debug("DEBUG: {} {} {}".format(opponentname,wins,losses))

@@ -27,4 +27,7 @@ class Season(models.Model):
 class Rankings(models.Model):
     user = models.CharField(max_length=200)
     ranking = models.IntegerField(default=1000)
+    wins = models.IntegerField(default=0)
+    losses = models.IntegerField(default=0)
+    total = models.IntegerField(default=0)
     created_on = models.DateTimeField('created_on')

@@ -18,7 +18,8 @@ git clone https://github.com/georgefahmy/slack-pongbot.git
 cd slack-pongbot
 pip install --ignore-installed -r requirements.txt
 echo 'API_TOKEN = "<API-KEY>"' > slackbot_settings.py
-./manage.py migrate
+./manage.py makemigrations (this might result in "No changes detected", this is fine)
+./manage.py migrate history
 ./manage.py run_bot
 ```
 - Invite pongbot to a channel.
