@@ -30,4 +30,3 @@ class Rankings(models.Model):
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     total = models.IntegerField(default=0)
-    created_on = models.DateTimeField('created_on')
