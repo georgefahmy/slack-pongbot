@@ -32,7 +32,6 @@ class Migration(migrations.Migration):
                 ('wins', models.IntegerField(default=0)),
                 ('losses', models.IntegerField(default=0)),
                 ('total', models.IntegerField(default=0)),
-                ('created_on', models.DateTimeField(verbose_name='created_on')),
             ],
         ),
         migrations.CreateModel(
