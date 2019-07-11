@@ -164,8 +164,9 @@ class Command(BaseCommand):
         @listen_to('^pongbot version', re.IGNORECASE)
         @listen_to('^pb version', re.IGNORECASE)
         def version(message):
-            help_message="Version 1.2 \n\n"+\
+            help_message="Version 1.3 \n\n"+\
                 " Version history \n" +\
+                " * `1.3` -- updated the database to track stats instead of calculating them live. \n" +\
                 " * `1.2` -- deprecated `pb won <@opponent>` and `pb loss <@opponent>` in favor of `pb result...` \n" +\
                 " * `1.1` -- added `pb result <@opponent> <wins> <losses>` for recording results quicker \n" +\
                 " * `1.0` -- added `who next`, added `pb @user history` -- specific user history \n" +\
@@ -470,11 +471,11 @@ class Command(BaseCommand):
             old_loser_losses = loser.values('losses')[0]['losses']
             old_loser_total = loser.values('total')[0]['total']
 
-
             ranking_results = rate_1vs1(old_winner_elo,old_loser_elo)
 
             new_winner_elo = int(round(ranking_results[0],0))
             new_loser_elo = int(round(ranking_results[1],0))
+
             winner_wins = old_winner_wins+1
             winner_total = old_winner_total+1
 
