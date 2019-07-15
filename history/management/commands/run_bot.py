@@ -541,35 +541,19 @@ class Command(BaseCommand):
 #########
         @listen_to('^pb challenge$',re.IGNORECASE)
         @listen_to('^pb accept$',re.IGNORECASE)
-        @listen_to('^pb win$',re.IGNORECASE)
-        @listen_to('^pb won$',re.IGNORECASE)
-        @listen_to('^pb lost$',re.IGNORECASE)
-        @listen_to('^pb loss$',re.IGNORECASE)
         @listen_to('^pongbot challenge$',re.IGNORECASE)
         @listen_to('^pongbot accept$',re.IGNORECASE)
-        @listen_to('^pongbot win$',re.IGNORECASE)
-        @listen_to('^pongbot won$',re.IGNORECASE)
-        @listen_to('^pongbot lost$',re.IGNORECASE)
-        @listen_to('^pongbot loss$',re.IGNORECASE)
         def error_history_2(message):
             message.reply('Please specify an opponent handle.')
 
-        @listen_to('^pb challenge (.*)$',re.IGNORECASE)
-        @listen_to('^pb accept (.*)$',re.IGNORECASE)
-        @listen_to('^pb win (.*)$',re.IGNORECASE)
-        @listen_to('^pb won (.*)$',re.IGNORECASE)
-        @listen_to('^pb lost (.*)$',re.IGNORECASE)
-        @listen_to('^pb loss (.*)$',re.IGNORECASE)
-        @listen_to('^pongbot challenge (.*)$',re.IGNORECASE)
-        @listen_to('^pongbot accept (.*)$',re.IGNORECASE)
-        @listen_to('^pongbot win (.*)$',re.IGNORECASE)
-        @listen_to('^pongbot won (.*)$',re.IGNORECASE)
-        @listen_to('^pongbot lost (.*)$',re.IGNORECASE)
-        @listen_to('^pongbot loss (.*)$',re.IGNORECASE)
-        def error_history_3(message,next_arg):
-            #message.reply('Please specify both a gametype and an opponent handle.')
-            pass
         @listen_to('^pb result (<@.*)$',re.IGNORECASE)
+        @listen_to('^pb results (<@.*)$',re.IGNORECASE)
+        @listen_to('^pb result$',re.IGNORECASE)
+        @listen_to('^pb results$',re.IGNORECASE)
+        @listen_to('^pongbot result (<@.*)$',re.IGNORECASE)
+        @listen_to('^pongbot results (<@.*)$',re.IGNORECASE)
+        @listen_to('^pongbot result$',re.IGNORECASE)
+        @listen_to('^pongbot results$',re.IGNORECASE)
         def error_results_1(message, arg1):
             raise Exception("No valid results posted, please include <wins> - <losses> after <@opponent>")
 
