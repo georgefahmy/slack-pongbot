@@ -26,83 +26,6 @@ class Command(BaseCommand):
             now2 = tz1.localize(now1)
             return now1
 
-        def _get_elo(start_date):
-            #get games from ORM
-            games = Game.objects.filter(created_on__gt=start_date).order_by('created_on')
-            #instantiate rankings object
-            rankings = {}
-            for game in games:
-                rankings[game.winner] = begin_elo_at
-                rankings[game.loser] = begin_elo_at
-
-            #build actual rankings
-            for game in games:
-                new_rankings = rate_1vs1(rankings[game.winner],rankings[game.loser])
-                rankings[game.winner] = new_rankings[0]
-                rankings[game.loser] = new_rankings[1]
-
-            for player in rankings:
-                rankings[player] = int(round(rankings[player],0))
-
-            return rankings
-
-        def _get_elo_graph(start_date):
-            #setup plotly
-            import random
-            import plotly.plotly as py
-            import plotly.graph_objs as go
-            py.sign_in('geofahm', 'B1WfY9zkbIPB819acKzg')
-
-            #get games from ORM
-            games = Game.objects.filter(created_on__gt=start_date).order_by('created_on')
-
-            #instantiate rankings object
-            rankings = {}
-            tracing = {}
-            for game in games:
-                tracing[game.winner] = begin_elo_at
-                tracing[game.loser] = begin_elo_at
-                rankings[game.winner] = begin_elo_at
-                rankings[game.loser] = begin_elo_at
-
-            x_axis = [game.created_on for game in games] + [ timezone.now() + timezone.timedelta(hours=24) ]
-
-            #setup history object
-            rankings_history = rankings.copy()
-            for player in rankings_history.keys():
-                rankings_history[player] = []
-
-            #build traces
-            for game in games:
-                new_rankings = rate_1vs1(rankings[game.winner],rankings[game.loser])
-                rankings[game.winner] = new_rankings[0]
-                rankings[game.loser] = new_rankings[1]
-                for player in tracing.keys():
-                    rankings_history[player] =  rankings_history[player] + [rankings[player]]
-
-            #add todays ranking
-            for player in tracing.keys():
-                rankings_history[player] =  rankings_history[player] + [rankings_history[player][-1]]
-
-            traces = []
-            # Create traces
-            for player in tracing.keys():
-                traces = traces + [ go.Scatter(
-                    x = x_axis,
-                    y = rankings_history[player],
-                    mode = 'lines',
-                    name = player
-                ) ]
-
-            # Plot!
-            url = ""
-            try:
-                url = py.plot(traces, filename='python-datetime',auto_open=False,xTitle='Dates',yTitle='ELO Rankings',title='Leaderboard history') + ".png?" + str(random.random())
-            except Exception:
-                pass
-
-            return url
-
         def _get_user_username(message,opponentname):
             if opponentname.find('>') > 0:
                 logging.debug("DEBUG found > in name, using opp_userid")
@@ -146,7 +69,7 @@ class Command(BaseCommand):
                 "    `pb who next` -- randomly selects someone for you to play \n" +\
                 " _Stats_: \n\n" +\
                 "    `pb leaderboard` -- displays this seasons leaderboard for table-tennis\n" +\
-                "    `pb <@user> history` -- shows the last 10 games for that user \n" +\
+                "    `pb <@player> history` -- shows up to the last 30 games for that player \n" +\
                 "    `pb season` -- displays season information for table-tennis\n\n" +\
                 "    `pb history` -- displays history for table-tennis\n\n" +\
                 " _About_: \n" +\
@@ -200,37 +123,7 @@ class Command(BaseCommand):
             return _leaderboard(message,True)
 
         def _leaderboard(message,seasoned=False):
-
-
-            STATS_SIZE_LIMIT = 10000
-
-            active_season , range_start_date = get_active_season(seasoned)
-
-            games = Game.objects.filter(created_on__gt=range_start_date)
-            if not games.count():
-                message.reply("No stats found for this game type {}.".format( "this season" if active_season is not None else "" ),in_thread=True)
-
-            players = list(set(list(games.values_list('winner',flat=True).distinct()) + list(games.values_list('loser',flat=True).distinct())))
-            stats_by_user = {}
-            elo_rankings = _get_elo(range_start_date)
-
-            for player in players:
-                stats_by_user[player] = { 'name': player, 'elo': elo_rankings[player], 'wins' : 0, 'losses': 0, 'total': 0 }
-
-            for game in games.order_by('-created_on')[:STATS_SIZE_LIMIT]:
-                stats_by_user[game.winner]['wins']+=1
-                stats_by_user[game.winner]['total']+=1
-                stats_by_user[game.loser]['losses']+=1
-                stats_by_user[game.loser]['total']+=1
-
-            for player in stats_by_user:
-                stats_by_user[player]['win_pct'] =  round(stats_by_user[player]['wins'] * 1.0 / stats_by_user[player]['total'],2)*100
-
-            stats_by_user = sorted(stats_by_user.items(), key=lambda x: -1 * x[1]['elo'])
-
-            season_str = "All time" if active_season is None else active_season
-            stats_str = "\n ".join([  " * {}({}): {}/{} ({}%)".format(stats[1]['name'],stats[1]['elo'],stats[1]['wins'],stats[1]['losses'],stats[1]['win_pct'])  for stats in stats_by_user ])
-            stats_str = "{} leaderboard: \n\n{}\n{}".format(season_str, stats_str,_get_elo_graph(range_start_date))
+            stats_str = rankings_order()
             message.reply(stats_str,in_thread=True)
 
         @listen_to('^pongbot season',re.IGNORECASE)
@@ -267,7 +160,7 @@ class Command(BaseCommand):
         @listen_to('^pb history',re.IGNORECASE)
         def history(message):
 
-            HISTORY_SIZE_LIMIT = 10
+            HISTORY_SIZE_LIMIT = 30
             history_str = "\n".join(list( [ "* " + str(game) for game in Game.objects.order_by('-created_on')[:HISTORY_SIZE_LIMIT] ]  ))
             if history_str:
                 history_str = "History for last {} games: \n\n{}".format(str(HISTORY_SIZE_LIMIT),history_str)
@@ -280,11 +173,11 @@ class Command(BaseCommand):
         def individual_history(message,user):
             #input sanitization
             user = _get_user_username(message,user)
-            logging.debug(user)
-            HISTORY_SIZE_LIMIT = 10
+            # logging.debug(user)
+            HISTORY_SIZE_LIMIT = 30
             history_str = "\n".join(list( [ "* " + str(game) for game in Game.objects.filter(Q(winner=user) | Q(loser=user)).order_by('-created_on')[:HISTORY_SIZE_LIMIT] ]  ))
 
-            games = (Game.objects.filter(Q(winner=user) | Q(loser=user)))
+            games = Game.objects.filter(Q(winner=user) | Q(loser=user))
             games = games.order_by('-created_on')
 
             trend = [ "W" if game.winner == user else "L" for game in games[0:trend_size] ]
@@ -304,8 +197,7 @@ class Command(BaseCommand):
 
             active_season , range_start_date = get_active_season(seasoned=False)
 
-            elo_rankings = _get_elo(range_start_date)
-            player_elo = elo_rankings[user]
+            player_elo = get_stats(user).ranking
 
             elo_message="\n\n{}'s elo ranking is {}.".format(user,player_elo)
 
@@ -440,36 +332,22 @@ class Command(BaseCommand):
             this_message = "{}, {} accepted your challenge! \n\n{}".format(opponentname,sender,gifurl)
             message.send(this_message)
 
-        @listen_to('pb highfive (.*)',re.IGNORECASE)
-        def highfive(message,user):
-            message.send('https://media.giphy.com/media/3o7TKTeL57EJdYFKBW/giphy.gif')
 
 ##########
-        def get_stats(winner_name,loser_name,time):
-            elo_start = 1000
+        def get_stats(user):
 
-            winner = Rankings.objects.filter(user = winner_name)
-            loser = Rankings.objects.filter(user = loser_name)
-
-            if not winner:
-                winner = Rankings.objects.create(user=winner_name,ranking=elo_start,wins=0,losses=0,total=0,created_on=time)
-                winner = Rankings.objects.filter(user = winner_name)
-
-            if not loser:
-                loser = Rankings.objects.create(user=loser_name,ranking=elo_start,wins=0,losses=0,total=0,created_on=time)
-                loser = Rankings.objects.filter(user = loser_name)
-
-            return winner, loser
+            user_stats = Rankings.objects.get_or_create(user=user)[0]
+            return user_stats
 ##########
         def update_stats(winner, loser):
 
-            old_winner_elo = winner.values('ranking')[0]['ranking']
-            old_winner_wins = winner.values('wins')[0]['wins']
-            old_winner_total = winner.values('total')[0]['total']
+            old_winner_elo = winner.ranking
+            old_winner_wins = winner.wins
+            old_winner_total = winner.total
 
-            old_loser_elo = loser.values('ranking')[0]['ranking']
-            old_loser_losses = loser.values('losses')[0]['losses']
-            old_loser_total = loser.values('total')[0]['total']
+            old_loser_elo = loser.ranking
+            old_loser_losses = loser.losses
+            old_loser_total = loser.total
 
             ranking_results = rate_1vs1(old_winner_elo,old_loser_elo)
 
@@ -482,14 +360,16 @@ class Command(BaseCommand):
             loser_losses = old_loser_losses+1
             loser_total = old_loser_total+1
 
-            winner.update(ranking=new_winner_elo)
-            winner.update(wins=winner_wins)
-            winner.update(total=winner_total)
+            winner.ranking = new_winner_elo
+            winner.wins = winner_wins
+            winner.total = winner_total
 
-            loser.update(ranking=new_loser_elo)
-            loser.update(losses=loser_losses)
-            loser.update(total=loser_total)
+            loser.ranking = new_loser_elo
+            loser.losses = loser_losses
+            loser.total = loser_total
 
+            winner.save()
+            loser.save()
 
             winner_diff = new_winner_elo - old_winner_elo
             loser_diff = new_loser_elo - old_loser_elo
@@ -497,13 +377,42 @@ class Command(BaseCommand):
             return ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total
 ##########
         def rankings_order():
-            list_of_rankings = Rankings.objects.values('user','ranking').order_by('-ranking')
-            logging.debug(list_of_rankings[0])
-            return list_of_rankings
+            list_of_users = list(Rankings.objects.values_list('user',flat=True).order_by('-ranking'))
+            rankings = {}
+            for player in list_of_users:
+                user_stats = get_stats(player)
+                win_pct = round(user_stats.wins*1.0/user_stats.total,2)*100
+                rankings[player] = { 'name': user_stats.user, 'ranking': user_stats.ranking, 'wins' : user_stats.wins, 'losses': user_stats.losses, 'total': user_stats.total ,'win_pct': win_pct}
+
+            rankings = sorted(rankings.items(), key=lambda x: -1 * x[1]['ranking'])
+            stats_str = "\n ".join([  " * {}({}): {}/{} ({}%)".format(player[1]['name'],player[1]['ranking'],player[1]['wins'],player[1]['losses'],player[1]['win_pct'])  for player in rankings ])
+
+            return stats_str
+
+
 ##########
         @listen_to('^pb update rankings')
         def create_rankings(message):
             time = current_time()
+            def _get_elo(start_date):
+                #get games from ORM
+                games = Game.objects.filter(created_on__gt=start_date).order_by('created_on')
+                #instantiate rankings object
+                rankings = {}
+                for game in games:
+                    rankings[game.winner] = begin_elo_at
+                    rankings[game.loser] = begin_elo_at
+
+                #build actual rankings
+                for game in games:
+                    new_rankings = rate_1vs1(rankings[game.winner],rankings[game.loser])
+                    rankings[game.winner] = new_rankings[0]
+                    rankings[game.loser] = new_rankings[1]
+
+                for player in rankings:
+                    rankings[player] = int(round(rankings[player],0))
+
+                return rankings
             STATS_SIZE_LIMIT = 1000
             games = Game.objects.filter(created_on__gt=default_start)
 
@@ -524,12 +433,7 @@ class Command(BaseCommand):
                 stats_by_user[player]['win_pct'] =  round(stats_by_user[player]['wins'] * 1.0 / stats_by_user[player]['total'],2)*100
 
             for player in stats_by_user:
-                ranking = Rankings.objects.create(user=stats_by_user[player]['name'],ranking=stats_by_user[player]['elo'],created_on=time)
-
-            stats_by_user = sorted(stats_by_user.items())
-
-            stats_str = "\n ".join([  " * {}({}): {}/{} ({}%)".format(stats[1]['name'],stats[1]['elo'],stats[1]['wins'],stats[1]['losses'],stats[1]['win_pct'])  for stats in stats_by_user ])
-            stats_str = "{}".format(stats_str)
+                ranking = Rankings.objects.create(user=stats_by_user[player]['name'],ranking=stats_by_user[player]['elo'],wins=stats_by_user[player]['wins'],losses=stats_by_user[player]['losses'],total=stats_by_user[player]['total'])
 
 ##########
         @listen_to('^pb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
@@ -554,7 +458,8 @@ class Command(BaseCommand):
                 active_season , range_start_date = get_active_season(True)
 
                 newgame = Game.objects.create(winner=sender,loser=opponentname,created_on=time,modified_on=time)
-                winner, loser = get_stats(sender,opponentname,time)
+                winner = get_stats(sender)
+                loser = get_stats(opponentname)
                 ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
                 rankings_order()
 
@@ -575,8 +480,9 @@ class Command(BaseCommand):
                 active_season , range_start_date = get_active_season(True)
 
                 newgame = Game.objects.create(winner=opponentname,loser=sender,created_on=time,modified_on=time)
-                old_winner_elo, old_loser_elo = get_stats(opponentname,sender,time)
-                ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(old_winner_elo, old_loser_elo)
+                winner = get_stats(sender)
+                loser = get_stats(opponentname)
+                ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
                 rankings_order()
 
             ##########
