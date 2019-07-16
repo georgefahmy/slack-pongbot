@@ -10,7 +10,7 @@ class Game(models.Model):
     modified_on = models.DateTimeField('modified_on')
 
     def __str__(self):
-        return '{} beat {}'.format(self.winner, self.loser, self.created_on.strftime('%T, %d %b %Y'))
+        return '{} beat {} at {} on {}'.format(self.winner, self.loser, self.created_on.strftime('%T'), self.created_on.strftime('%b-%d %y'))
 
 class Season(models.Model):
     start_on = models.DateTimeField('start_on')

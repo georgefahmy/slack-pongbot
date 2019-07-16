@@ -56,45 +56,43 @@ class Command(BaseCommand):
             gifurl = random.choice (gifs)
             return gifurl
 
-        @listen_to('^pongbot help', re.IGNORECASE)
-        @listen_to('^pb help', re.IGNORECASE)
+        @listen_to('^gamebot help', re.IGNORECASE)
+        @listen_to('^gb help', re.IGNORECASE)
         def help(message):
-            help_message="Hello! I'm pongbot, I'll track your Table-Tennis statistics.  Here's how to use me: \n\n"+\
+            help_message="Hello! I'm Gamebot, I'll track your Ping-pong statistics.  Here's how to use me: \n\n"+\
                 " _Play_: \n" +\
-                "    `pb challenge <@opponent>` -- challenges @opponent to a friendly game of table-tennis \n" +\
-                "    `pb taunt <@opponent> ` -- taunt @opponent \n" +\
-                "    `pb accept <@opponent>` -- accepts a challenge \n" +\
-                "    `pb result <@opponent> <wins> - <losses>` -- records the results against a single opponent (e.g. `pb result @johndoe 3-2`) \n" +\
-                "    `pb predict <@opponent>` -- predict the outcome of a game between you and @opponent \n" +\
-                "    `pb who next` -- randomly selects someone for you to play \n" +\
+                "    `gb challenge <@opponent>` -- challenges @opponent to a friendly game of table-tennis \n" +\
+                "    `gb taunt <@opponent> ` -- taunt @opponent \n" +\
+                "    `gb accept <@opponent>` -- accepts a challenge \n" +\
+                "    `gb result <@opponent> <wins> - <losses>` -- records the results against a single opponent (e.g. `gb result @johndoe 3-2`) \n" +\
+                "    `gb predict <@opponent>` -- predict the outcome of a game between you and @opponent \n" +\
+                "    `gb who next` -- randomly selects someone for you to play \n\n" +\
                 " _Stats_: \n\n" +\
-                "    `pb leaderboard` -- displays this seasons leaderboard for table-tennis\n" +\
-                "    `pb <@player> history` -- shows up to the last 30 games for that player \n" +\
-                "    `pb season` -- displays season information for table-tennis\n\n" +\
-                "    `pb history` -- displays history for table-tennis\n\n" +\
+                "    `gb leaderboard` -- displays this seasons leaderboard for table-tennis\n" +\
+                "    `gb <@player> history` -- shows up to the last 30 games for that player \n" +\
+                "    `gb global history` -- displays history for table-tennis\n" +\
+                "    `gb season` -- displays season information for table-tennis\n\n" +\
                 " _About_: \n" +\
-                "    `pb help` -- displays help menu (this thing)\n" +\
-                " You may also call me by my full name: `pongbot <command>`." +\
+                "    `gb help` -- displays help menu (this thing)\n" +\
+                " You may also call me by my full name: `gamebot <command>`." +\
                 " "
-                # "    `pb alltime leaderboard table-tennis` -- displays the all time leaderboard for table-tennis\n" +\
-                # "    `pb version` -- displays my software version\n\n" +\
-                # "    `pb won <@opponent>` -- records a win for you against @opponent \n" +\
-                # "    `pb lost <@opponent>` -- records a loss for you against @opponent \n" +\
+                # "    `gb alltime leaderboard table-tennis` -- displays the all time leaderboard for table-tennis\n" +\
+                # "    `gb version` -- displays my software version\n\n" +\
 
-            message.send(help_message)
+            message.reply(help_message)
 
 
-        @listen_to('^pongbot version', re.IGNORECASE)
-        @listen_to('^pb version', re.IGNORECASE)
+        @listen_to('^gamebot version', re.IGNORECASE)
+        @listen_to('^gb version', re.IGNORECASE)
         def version(message):
-            help_message="Version 1.3 \n\n"+\
+            version_message="Version 1.3 \n\n"+\
                 " Version history \n" +\
                 " * `1.3` -- updated the database to track stats instead of calculating them live. \n" +\
                 " * `1.2` -- deprecated `pb won <@opponent>` and `pb loss <@opponent>` in favor of `pb result...` \n" +\
                 " * `1.1` -- added `pb result <@opponent> <wins> <losses>` for recording results quicker \n" +\
                 " * `1.0` -- added `who next`, added `pb @user history` -- specific user history \n" +\
                 ""
-            message.reply(help_message)
+            message.reply(version_message)
 
         def get_active_season(seasoned):
             range_start_date = default_start
@@ -112,13 +110,13 @@ class Command(BaseCommand):
 
             return active_season, range_start_date
 
-        @listen_to('^pongbot alltime leaderboard',re.IGNORECASE)
-        @listen_to('^pb alltime leaderboard', re.IGNORECASE)
+        @listen_to('^gamebot alltime leaderboard',re.IGNORECASE)
+        @listen_to('^gb alltime leaderboard', re.IGNORECASE)
         def unseasoned_leaderboard(message):
             return _leaderboard(message,False)
 
-        @listen_to('^pongbot leaderboard',re.IGNORECASE)
-        @listen_to('^pb leaderboard', re.IGNORECASE)
+        @listen_to('^gamebot leaderboard',re.IGNORECASE)
+        @listen_to('^gb leaderboard', re.IGNORECASE)
         def seasoned_leaderboard(message):
             return _leaderboard(message,True)
 
@@ -126,8 +124,8 @@ class Command(BaseCommand):
             stats_str = rankings_order()
             message.reply(stats_str,in_thread=True)
 
-        @listen_to('^pongbot season',re.IGNORECASE)
-        @listen_to('^pb season',re.IGNORECASE)
+        @listen_to('^gamebot season',re.IGNORECASE)
+        @listen_to('^gb season',re.IGNORECASE)
         def season(message):
             #close current season
             active_season, start_on = get_active_season(True)
@@ -136,8 +134,8 @@ class Command(BaseCommand):
             msg_str = "{} is active. \nUse `pongbot end season` to end this season.".format(active_season)
             message.send(msg_str)
 
-        @listen_to('^pongbot end season',re.IGNORECASE)
-        @listen_to('^pb end season',re.IGNORECASE)
+        @listen_to('^gamebot end season',re.IGNORECASE)
+        @listen_to('^gb end season',re.IGNORECASE)
         def end_season(message):
 
             #close current season
@@ -156,8 +154,8 @@ class Command(BaseCommand):
             msg_str = "{} ended.\n\n {} opened".format(active_season,new_season)
             message.send(msg_str)
 
-        @listen_to('^pongbot history',re.IGNORECASE)
-        @listen_to('^pb history',re.IGNORECASE)
+        @listen_to('^gamebot global history',re.IGNORECASE)
+        @listen_to('^gb global history',re.IGNORECASE)
         def history(message):
 
             HISTORY_SIZE_LIMIT = 30
@@ -168,8 +166,8 @@ class Command(BaseCommand):
             else:
                 message.send('No history found.')
 
-        @listen_to('^pongbot (<@.*) history',re.IGNORECASE)
-        @listen_to('^pb (<@.*) history',re.IGNORECASE)
+        @listen_to('^gamebot (<@.*) history',re.IGNORECASE)
+        @listen_to('^gb (<@.*) history',re.IGNORECASE)
         def individual_history(message,user):
             #input sanitization
             user = _get_user_username(message,user)
@@ -212,8 +210,8 @@ class Command(BaseCommand):
             #
             # message.reply("{}'s elo ranking is {}.".format(user,player_elo),in_thread=True)
 
-        @listen_to('^pb challenge (.*)',re.IGNORECASE)
-        @listen_to('^pongbot challenge (.*)',re.IGNORECASE)
+        @listen_to('^gb challenge (.*)',re.IGNORECASE)
+        @listen_to('^gamebot challenge (.*)',re.IGNORECASE)
         def challenge(message,opponentname):
             #setup
             sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
@@ -232,8 +230,8 @@ class Command(BaseCommand):
             this_message = "{}, {} challenged you to a game!. Accept like this: `{}` \n\n{}".format(opponentname,sender,accept_message,gifurl)
             message.send(this_message)
 
-        @listen_to('^pb taunt (.*)',re.IGNORECASE)
-        @listen_to('^pongbot taunt (.*)',re.IGNORECASE)
+        @listen_to('^gb taunt (.*)',re.IGNORECASE)
+        @listen_to('^gamebot taunt (.*)',re.IGNORECASE)
         def taunt(message,opponentname):
 
             #setup
@@ -251,8 +249,8 @@ class Command(BaseCommand):
             this_message = "{}, {} taunted you {}".format(opponentname,sender,gifurl)
             message.send(this_message)
 
-        @listen_to('^pb predict (.*)',re.IGNORECASE)
-        @listen_to('^pongbot predict (.*)',re.IGNORECASE)
+        @listen_to('^gb predict (.*)',re.IGNORECASE)
+        @listen_to('^gamebot predict (.*)',re.IGNORECASE)
         def predict(message,opponentname,seasoned=False):
             _predict(message,opponentname,True,False)
             _predict(message,opponentname,False,True)
@@ -314,8 +312,8 @@ class Command(BaseCommand):
             message.send(this_message)
 
 
-        @listen_to('^pb accept (.*)',re.IGNORECASE)
-        @listen_to('^pongbot accept (.*)',re.IGNORECASE)
+        @listen_to('^gb accept (.*)',re.IGNORECASE)
+        @listen_to('^gamebot accept (.*)',re.IGNORECASE)
         def accepted(message,opponentname):
             #setup
             sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
@@ -391,7 +389,7 @@ class Command(BaseCommand):
 
 
 ##########
-        @listen_to('^pb update rankings')
+        @listen_to('^gb update rankings')
         def create_rankings(message):
             time = current_time()
             def _get_elo(start_date):
@@ -432,14 +430,20 @@ class Command(BaseCommand):
             for player in stats_by_user:
                 stats_by_user[player]['win_pct'] =  round(stats_by_user[player]['wins'] * 1.0 / stats_by_user[player]['total'],2)*100
 
+            #delete all entries before recreating them
+            Rankings.objects.all().delete()
+
             for player in stats_by_user:
-                ranking = Rankings.objects.create(user=stats_by_user[player]['name'],ranking=stats_by_user[player]['elo'],wins=stats_by_user[player]['wins'],losses=stats_by_user[player]['losses'],total=stats_by_user[player]['total'])
+                stats = Rankings.objects.create(user=stats_by_user[player]['name'],ranking=stats_by_user[player]['elo'],wins=stats_by_user[player]['wins'],losses=stats_by_user[player]['losses'],total=stats_by_user[player]['total'])
+
+            from pprint import pprint
+            pprint(stats_by_user)
 
 ##########
-        @listen_to('^pb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
-        @listen_to('^pb results (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
-        @listen_to('^pb result (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
-        @listen_to('^pb results (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
+        @listen_to('^gb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
+        @listen_to('^gb results (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
+        @listen_to('^gb result (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
+        @listen_to('^gb results (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
         def results(message, opponentname, wins, losses ):
             def won2(message, opponentname):
                 time = current_time()
@@ -480,8 +484,8 @@ class Command(BaseCommand):
                 active_season , range_start_date = get_active_season(True)
 
                 newgame = Game.objects.create(winner=opponentname,loser=sender,created_on=time,modified_on=time)
-                winner = get_stats(sender)
-                loser = get_stats(opponentname)
+                winner = get_stats(opponentname)
+                loser = get_stats(sender)
                 ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
                 rankings_order()
 
@@ -507,7 +511,7 @@ class Command(BaseCommand):
 ##########
 
         # Who should I play next
-        @listen_to('^pb who next', re.IGNORECASE)
+        @listen_to('^gb who next', re.IGNORECASE)
         def opponent_select(message):
             from random import choice
             #setup_sender
@@ -539,23 +543,20 @@ class Command(BaseCommand):
             message.send("{}, you should play {} next! \n Do you want to challenge them? Type `pb challenge {}`".format(sender,opponent,opponent))
 
 #########
-        @listen_to('^pb challenge$',re.IGNORECASE)
-        @listen_to('^pb accept$',re.IGNORECASE)
-        @listen_to('^pongbot challenge$',re.IGNORECASE)
-        @listen_to('^pongbot accept$',re.IGNORECASE)
+        @listen_to('^gb challenge$',re.IGNORECASE)
+        @listen_to('^gb accept$',re.IGNORECASE)
+        @listen_to('^gamebot challenge$',re.IGNORECASE)
+        @listen_to('^gamebot accept$',re.IGNORECASE)
         def error_history_2(message):
             message.reply('Please specify an opponent handle.')
 
-        @listen_to('^pb result (<@.*)$',re.IGNORECASE)
-        @listen_to('^pb results (<@.*)$',re.IGNORECASE)
-        @listen_to('^pb result$',re.IGNORECASE)
-        @listen_to('^pb results$',re.IGNORECASE)
-        @listen_to('^pongbot result (<@.*)$',re.IGNORECASE)
-        @listen_to('^pongbot results (<@.*)$',re.IGNORECASE)
-        @listen_to('^pongbot result$',re.IGNORECASE)
-        @listen_to('^pongbot results$',re.IGNORECASE)
-        def error_results_1(message, arg1):
-            raise Exception("No valid results posted, please include <wins> - <losses> after <@opponent>")
+        @listen_to('^gb challenge (.*)$',re.IGNORECASE)
+        @listen_to('^gb accept (.*)$',re.IGNORECASE)
+        @listen_to('^gamebot challenge (.*)$',re.IGNORECASE)
+        @listen_to('^gamebot accept (.*)$',re.IGNORECASE)
+        def error_history_3(message,next_arg):
+            #message.reply('Please specify both a gametype and an opponent handle.')
+            pass
 
         def main():
             kw = {
