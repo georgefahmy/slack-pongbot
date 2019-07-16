@@ -85,8 +85,9 @@ class Command(BaseCommand):
         @listen_to('^gamebot version', re.IGNORECASE)
         @listen_to('^gb version', re.IGNORECASE)
         def version(message):
-            version_message="Version 1.3 \n\n"+\
+            version_message="Version 1.4 \n\n"+\
                 " Version history \n" +\
+                " * `1.4` -- pongbot first release for use. \n" +\
                 " * `1.3` -- updated the database to track stats instead of calculating them live. \n" +\
                 " * `1.2` -- deprecated `pb won <@opponent>` and `pb loss <@opponent>` in favor of `pb result...` \n" +\
                 " * `1.1` -- added `pb result <@opponent> <wins> <losses>` for recording results quicker \n" +\
