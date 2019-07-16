@@ -4,13 +4,15 @@ from history.models import Game, Season, Rankings
 from datetime import datetime, date
 from pytz import timezone as tzone
 from collections import Counter
-from elo import rate_1vs1
+from elo import rate_1vs1, setup
 from django.conf import settings
 from django.db.models import Q
 from time import sleep
 
+
 default_start = date(2019, 6, 1)
 trend_size = 30
+setup(k_factor=30)
 
 class Command(BaseCommand):
     help = 'Runs slackbot'
