@@ -61,7 +61,7 @@ class Command(BaseCommand):
         @listen_to('^gamebot help', re.IGNORECASE)
         @listen_to('^gb help', re.IGNORECASE)
         def help(message):
-            help_message="Hello! I'm Pongbot, I'll track your Ping-pong statistics.  Here's how to use me: \n\n"+\
+            help_message="Hello! I'm Gamebot, I'll track your Ping-pong statistics.  Here's how to use me: \n\n"+\
                 " _Play_: \n" +\
                 "    `gb challenge <@opponent>` -- challenges @opponent to a friendly game of Ping-pong \n" +\
                 "    `gb taunt <@opponent> ` -- taunt @opponent \n" +\
