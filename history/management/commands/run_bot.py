@@ -70,10 +70,12 @@ class Command(BaseCommand):
                 "    `pb predict <@opponent>` -- predict the outcome of a game between you and @opponent \n" +\
                 "    `pb who next` -- randomly selects someone for you to play \n\n" +\
                 " _Stats_: \n\n" +\
-                "    `pb leaderboard` -- displays this seasons leaderboard for table-tennis\n" +\
-                "    `pb <@player> history` -- shows up to the last 30 games for that player \n" +\
-                "    `pb global history` -- displays history for table-tennis\n" +\
-                "    `pb season` -- displays season information for table-tennis\n\n" +\
+                "    `gb leaderboard` -- displays this seasons leaderboard for table-tennis\n" +\
+                "    `gb <@player> history` -- shows up to the last 30 games for that player \n" +\
+                "    `gb <@player> elo` -- shows the player's elo ranking \n" +\
+                "    `gb global history` -- displays history for table-tennis\n" +\
+                "    `gb season` -- displays season information for table-tennis\n\n" +\
+
                 " _About_: \n" +\
                 "    `pb help` -- displays help menu (this thing)\n" +\
                 " You may also call me by my full name: `pongbot <command>`." +\
@@ -87,13 +89,14 @@ class Command(BaseCommand):
         @listen_to('^pongbot version', re.IGNORECASE)
         @listen_to('^pb version', re.IGNORECASE)
         def version(message):
-            version_message="Version 1.4 \n\n"+\
+            version_message="Version 1.4.1 \n\n"+\
                 " Version history \n" +\
-                " * `1.4` -- pongbot first release for use. \n" +\
+                " * `1.4.1` -- add individual elo ranking message. \n" +\
+                " * `1.4` -- gamebot first release for use. \n" +\
                 " * `1.3` -- updated the database to track stats instead of calculating them live. \n" +\
-                " * `1.2` -- deprecated `pb won <@opponent>` and `pb loss <@opponent>` in favor of `pb result...` \n" +\
-                " * `1.1` -- added `pb result <@opponent> <wins> <losses>` for recording results quicker \n" +\
-                " * `1.0` -- added `who next`, added `pb @user history` -- specific user history \n" +\
+                " * `1.2` -- deprecated `gb won <@opponent>` and `gb loss <@opponent>` in favor of `gb result...` \n" +\
+                " * `1.1` -- added `gb result <@opponent> <wins> <losses>` for recording results quicker \n" +\
+                " * `1.0` -- added `who next`, added `gb @user history` -- specific user history \n" +\
                 ""
             message.reply(version_message)
 
@@ -389,7 +392,14 @@ class Command(BaseCommand):
             stats_str = "\n ".join([  " * {}({}): {}/{} ({}%)".format(player[1]['name'],player[1]['ranking'],player[1]['wins'],player[1]['losses'],player[1]['win_pct'])  for player in rankings ])
 
             return stats_str
+##########
+        @listen_to('^gamebot (<@.*) elo',re.IGNORECASE)
+        @listen_to('^gb (<@.*) elo',re.IGNORECASE)
+        def player_elo(message,user):
+            player = _get_user_username(message,user)
 
+            elo = get_stats(player).ranking
+            message.reply("{}'s elo ranking is {}".format(player,elo),in_thread=True)
 
 ##########
         @listen_to('^pb update rankings')
