@@ -75,7 +75,6 @@ class Command(BaseCommand):
                 "    `gb <@player> elo` -- shows the player's elo ranking \n" +\
                 "    `gb global history` -- displays history for table-tennis\n" +\
                 "    `gb season` -- displays season information for table-tennis\n\n" +\
-
                 " _About_: \n" +\
                 "    `pb help` -- displays help menu (this thing)\n" +\
                 " You may also call me by my full name: `pongbot <command>`." +\
