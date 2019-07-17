@@ -76,8 +76,8 @@ class Command(BaseCommand):
                 "    `gb global history` -- displays history for table-tennis\n" +\
                 "    `gb season` -- displays season information for table-tennis\n\n" +\
                 " _About_: \n" +\
-                "    `pb help` -- displays help menu (this thing)\n" +\
-                " You may also call me by my full name: `pongbot <command>`." +\
+                "    `gb help` -- displays help menu (this thing)\n" +\
+                " You may also call me by my full name: `gamebot <command>`." +\
                 " "
                 # "    `gb alltime leaderboard table-tennis` -- displays the all time leaderboard for table-tennis\n" +\
                 # "    `gb version` -- displays my software version\n\n" +\
