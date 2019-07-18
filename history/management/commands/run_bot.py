@@ -30,30 +30,37 @@ class Command(BaseCommand):
 
         def _get_user_username(message,opponentname):
             if opponentname.find('>') > 0:
-                logging.debug("DEBUG found > in name, using opp_userid")
                 opp_userid = opponentname.replace('@','').replace('<','').replace('>','').strip()
                 display_name = str(message.channel._client.users[opp_userid]['profile']['display_name'])
                 if not display_name:
                     opponentname = '@' + str(message.channel._client.users[opp_userid]['profile']['real_name'])
+                    logging.debug("DEBUG real_name: {}".format(opponentname))
                 else:
                     opponentname = '@' + str(message.channel._client.users[opp_userid]['profile']['display_name'])
-                logging.debug("DEBUG opponent: {}".format(opponentname))
+                    logging.debug("DEBUG display_name: {}".format(opponentname))
             else:
-                logging.debug("found no > in name, not using opp_user_id")
                 opponentname = opponentname if opponentname.find('@') != -1 else '@' + opponentname
-                logging.debug("DEBUG opponent: {}".format(opponentname))
+                logging.debug("DEBUG: not using opp_user_id, opponent: {}".format(opponentname))
+
             return opponentname.lower()
+
+        def _get_sender_username(message):
+            display_name = str(message.channel._client.users[message.body['user']]['profile']['display_name'])
+            if not display_name:
+                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['real_name'])
+                logging.debug("DEBUG real_name: {}".format(sender))
+            else:
+                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
+                logging.debug("DEBUG display_name: {}".format(sender))
+
+            return sender.lower()
 
         def get_gif(type):
             if type == 'challenge':
                 gifs = ['http://media0.giphy.com/media/DaNgLGo1xefu0/200.gif','http://media2.giphy.com/media/HbkT5F5CiRD3O/200.gif','http://media4.giphy.com/media/10mRi3yn0TVjGw/200.gif','http://media0.giphy.com/media/lcezaVyxCMMqQ/200.gif','http://media2.giphy.com/media/zp0nsdaiKMP4s/200.gif','http://media1.giphy.com/media/QDMBetxJ8YDvy/200.gif','http://media1.giphy.com/media/ozhDtzrmemc0w/200.gif','http://media1.giphy.com/media/rhV4HrtcNkgW4/200.gif','http://media0.giphy.com/media/dW073LLVqyUH6/200.gif','http://media2.giphy.com/media/peM7G1oWYgahW/200.gif','http://media2.giphy.com/media/E8GWazqt84V1u/200.gif','http://media2.giphy.com/media/qX3CivVQbEwo/200.gif','http://media1.giphy.com/media/Xmhz0vejtVhp6/200.gif','http://media4.giphy.com/media/CTeW3X1txg556/200.gif','http://media3.giphy.com/media/T6wZ2b32ZRORW/200.gif','http://media3.giphy.com/media/R7IYpzLLMBomk/200.gif','http://media3.giphy.com/media/DeoY3iC6VLBHG/200.gif','https://media1.giphy.com/media/l0NwKRRtGFjT9k6Q0/200.gif','https://media4.giphy.com/media/q7dp7xY7sHGCs/200.gif','https://media4.giphy.com/media/T6cP9jEs04fbW/200.gif','https://media3.giphy.com/media/xTcnT1NyU61Fpk75WU/200.gif','https://media0.giphy.com/media/Z6gwIJr7CPoqI/200.gif','https://media3.giphy.com/media/Z0Umc2aJY64XS/200.gif','https://media2.giphy.com/media/Ndy3hL4v1miMo/200.gif','https://media1.giphy.com/media/14dspyNocVyBwI/200.gif','https://media2.giphy.com/media/26tPoKcKX13IejXt6/200.gif','https://media4.giphy.com/media/lD08EuqQjc1K8/200.gif','https://media0.giphy.com/media/xTiTnCdwS6XsosHHyM/200.gif','https://media4.giphy.com/media/vdLRwjtIZ7g3K/200.gif','https://media0.giphy.com/media/VNGBU36a1vhwA/200.gif','https://media0.giphy.com/media/xTiTnin6Dlh2VGMbo4/200.gif','https://media2.giphy.com/media/phuTWDjfoXYcw/200.gif','https://media1.giphy.com/media/12TZCBBU3tFPY4/200.gif','https://media4.giphy.com/media/l7IwVljx8wgSc/200.gif','https://media0.giphy.com/media/3o85xJm1Rh6pISHhks/200.gif','https://media1.giphy.com/media/3oEdv73lmCG5GGiWxa/200.gif','https://media2.giphy.com/media/3oEdv3V0pwSlsKkKGs/200.gif','https://media3.giphy.com/media/gw3zMXiPDkOyVBsc/200.gif','https://media2.giphy.com/media/3o85xHHfQ1NiRfocCc/200.gif','https://media4.giphy.com/media/3o85xLA0jpUO3LlIc0/200.gif','https://media1.giphy.com/media/Ux15Wjv9kDRFm/200.gif','https://media1.giphy.com/media/1391lvKWNyuc9i/200.gif']
-            elif type == 'taunt':
-                gifs = ['https://media1.giphy.com/media/l0GRkpk8mcWhekrVC/200.gif' ,'https://media4.giphy.com/media/l41lKvLqu2xcYX8ly/200.gif' ,'https://media1.giphy.com/media/3o85xvq7HFBjnX3VBK/200.gif' ,'https://media2.giphy.com/media/tG4q5t4gdepjy/200.gif' ,'https://media4.giphy.com/media/YE5RrQAC1g7xm/200.gif' ,'https://media0.giphy.com/media/BFw86Be9MSWNa/200.gif' ,'https://media3.giphy.com/media/wp8DE7gpQKre0/200.gif' ,'https://media4.giphy.com/media/14wAFFW4x09qgw/200.gif' ,'https://media3.giphy.com/media/7Q8wiXGmhbXO0/200.gif' ,'https://media2.giphy.com/media/tvC9faYbQrHlS/200.gif' ,'https://media4.giphy.com/media/fCOYq0wyKeWZy/200.gif' ,'https://media0.giphy.com/media/136ttE0X1uWmsM/200.gif' ,'https://media0.giphy.com/media/86VV3ZYT1owDu/200.gif' ,'https://media0.giphy.com/media/rg22G4omR08lW/200.gif' ,'https://media0.giphy.com/media/u1hqtTKoTWVHi/200.gif' ,'https://media3.giphy.com/media/ETKSOS0KOgljO/200.gif' ,'https://media1.giphy.com/media/N4iJYIkzuIn6g/200.gif' ,'https://media4.giphy.com/media/pK1xYb8ftQZdm/200.gif' ,'https://media2.giphy.com/media/qGgu8qGWbPMkg/200.gif' ,'https://media3.giphy.com/media/FenUXhxrhGLle/200.gif' ,'https://media1.giphy.com/media/LByI6Ze8GWZKo/200.gif' ,'https://media1.giphy.com/media/uLHj9dmluha8M/200.gif' ,'https://media0.giphy.com/media/SpdOR2xwYzvYk/200.gif' ,'https://media3.giphy.com/media/kOlwMOrqkBQ6A/200.gif' ,'https://media3.giphy.com/media/WgvO9zb96dVx6/200.gif','https://media1.giphy.com/media/cnczob1SfXevK/200.gif','https://media1.giphy.com/media/HgRlGFapLl92U/200.gif','https://media3.giphy.com/media/ZOW5uliTiHwLS/200.gif','https://media0.giphy.com/media/jXAfNZqbmaEb6/200.gif','https://media2.giphy.com/media/LOpsoo3yRDHbi/200.gif','https://media1.giphy.com/media/11UV14XPbGFyCc/200.gif','https://media4.giphy.com/media/KqFsOCQZweNhK/200.gif','https://media4.giphy.com/media/qN7NZR3Q5R2mY/200.gif','https://media3.giphy.com/media/qraiyjvXXP2oM/200.gif','https://media4.giphy.com/media/VzbN9gupkkXp6/200.gif','https://media2.giphy.com/media/Qr4JSl1M86qLC/200.gif','https://media3.giphy.com/media/h38BLEj9QOx0I/200.gif','https://media0.giphy.com/media/BJMIzBe8OZyWQ/200.gif','https://media3.giphy.com/media/RSzvGBuoQRlp6/200.gif']
-            elif type == 'winorloss':
-                gifs = ['https://media1.giphy.com/media/Vs6ASalhnbomk/200.gif','https://media4.giphy.com/media/k4dmtQafDuhDG/200.gif','https://media4.giphy.com/media/6gyuq0k9zIcBG/200.gif','https://media1.giphy.com/media/11IPXDbYmRRNwk/200.gif','https://media1.giphy.com/media/13t2Pa6WECl8je/200.gif','https://media3.giphy.com/media/aHJ6uCT5aMcPS/200.gif','https://media0.giphy.com/media/s2pfpFIc6CDlu/200.gif','https://media1.giphy.com/media/11IPXDbYmRRNwk/200.gif','https://media4.giphy.com/media/M0yDGzfdQQOcg/200.gif','https://media3.giphy.com/media/YJ6TmsrR4rjOg/200.gif','https://media3.giphy.com/media/Mp19UE9GMARKE/200.gif','https://media1.giphy.com/media/fdgOAnZS81CRq/200.gif','https://media3.giphy.com/media/OetNQSs0jO7Kw/200.gif']
             else:
-                gifs = ['http://media.tumblr.com/0e07ec60ce9b5f8019e7e98510e3e86e/tumblr_inline_mvq3ol2lHr1qahu1s.gif','http://38.media.tumblr.com/tumblr_ls933rtrAa1r3v6f2o1_500.gif','http://media.tumblr.com/ee3d490720837f2728e8de52094e1413/tumblr_inline_mknw21r56j1qz4rgp.gif','http://25.media.tumblr.com/ec131b67c3a55dcb99fa5e4ef5f3599b/tumblr_mmst60zClN1rhhrvto1_500.gif','http://31.media.tumblr.com/eb9e90aff682182d613737b9072f8e41/tumblr_mgo892vhpu1rk6n1go1_500.gif','http://media.tumblr.com/tumblr_mdicgvDPim1qh8ujs.gif','http://31.media.tumblr.com/f86af9c670404254ae22ab900a4c51f1/tumblr_mypy1toyaL1sgrpsuo1_500.gif','http://33.media.tumblr.com/aebeb686a640493b512c8999881d1fb5/tumblr_njzrzaICmG1s3h43ko1_500.gif','http://24.media.tumblr.com/209fafb786577f6556c8b49c1c8112e4/tumblr_mlqov0OsUf1rch0b8o1_500.gif','https://media2.giphy.com/media/l0NwIoO8LN6Pr3Ety/200.gif','https://media1.giphy.com/media/sNWGEbc5Jzp4c/200.gif','https://media3.giphy.com/media/l41m5FCBtcRpH4Djq/200.gif','https://media4.giphy.com/media/A4HCrFVdbxZpS/200.gif','https://media3.giphy.com/media/14g4EHIdeENmda/200.gif','https://media0.giphy.com/media/SF7kg7hOePkkg/200.gif','https://media3.giphy.com/media/e2wFIvRQ71MaI/200.gif','https://media2.giphy.com/media/iMlzhPDCJ7bQA/200.gif','https://media3.giphy.com/media/DTdI3KKdS8TBK/200.gif','https://media4.giphy.com/media/10h8kjAyPnGRsA/200.gif','https://media2.giphy.com/media/XKcxxxW2e075e/200.gif','https://media0.giphy.com/media/80QhlBqHx1DMs/200.gif','https://media3.giphy.com/media/14unPQFbyCdq2A/200.gif','https://media4.giphy.com/media/jgelsNvS6tYFG/200.gif','https://media1.giphy.com/media/PentDub5eQnu0/200.gif','https://media4.giphy.com/media/rCciDdJY8aTvO/200.gif','https://media2.giphy.com/media/JVC7ZSJEEpYgU/200.gif','https://media4.giphy.com/media/ef0ZKzcEPOBhK/200.gif','https://media0.giphy.com/media/kaDYxHzwxVlBK/200.gif','https://media2.giphy.com/media/MsC2pXWAPUqru/200.gif','https://media3.giphy.com/media/11nI3aybdZ9EA0/200.gif','https://media1.giphy.com/media/iGMQJxHoi9iDK/200.gif','https://media3.giphy.com/media/OYlmWQVEuM6yc/200.gif','https://media4.giphy.com/media/U90QBiNwIuV0c/200.gif']
-
+                gifs = ['https://media1.giphy.com/media/l0GRkpk8mcWhekrVC/200.gif' ,'https://media4.giphy.com/media/l41lKvLqu2xcYX8ly/200.gif' ,'https://media1.giphy.com/media/3o85xvq7HFBjnX3VBK/200.gif' ,'https://media2.giphy.com/media/tG4q5t4gdepjy/200.gif' ,'https://media4.giphy.com/media/YE5RrQAC1g7xm/200.gif' ,'https://media0.giphy.com/media/BFw86Be9MSWNa/200.gif' ,'https://media3.giphy.com/media/wp8DE7gpQKre0/200.gif' ,'https://media4.giphy.com/media/14wAFFW4x09qgw/200.gif' ,'https://media3.giphy.com/media/7Q8wiXGmhbXO0/200.gif' ,'https://media2.giphy.com/media/tvC9faYbQrHlS/200.gif' ,'https://media4.giphy.com/media/fCOYq0wyKeWZy/200.gif' ,'https://media0.giphy.com/media/136ttE0X1uWmsM/200.gif' ,'https://media0.giphy.com/media/86VV3ZYT1owDu/200.gif' ,'https://media0.giphy.com/media/rg22G4omR08lW/200.gif' ,'https://media0.giphy.com/media/u1hqtTKoTWVHi/200.gif' ,'https://media3.giphy.com/media/ETKSOS0KOgljO/200.gif' ,'https://media1.giphy.com/media/N4iJYIkzuIn6g/200.gif' ,'https://media4.giphy.com/media/pK1xYb8ftQZdm/200.gif' ,'https://media2.giphy.com/media/qGgu8qGWbPMkg/200.gif' ,'https://media3.giphy.com/media/FenUXhxrhGLle/200.gif' ,'https://media1.giphy.com/media/LByI6Ze8GWZKo/200.gif' ,'https://media1.giphy.com/media/uLHj9dmluha8M/200.gif' ,'https://media0.giphy.com/media/SpdOR2xwYzvYk/200.gif' ,'https://media3.giphy.com/media/kOlwMOrqkBQ6A/200.gif' ,'https://media3.giphy.com/media/WgvO9zb96dVx6/200.gif','https://media1.giphy.com/media/cnczob1SfXevK/200.gif','https://media1.giphy.com/media/HgRlGFapLl92U/200.gif','https://media3.giphy.com/media/ZOW5uliTiHwLS/200.gif','https://media0.giphy.com/media/jXAfNZqbmaEb6/200.gif','https://media2.giphy.com/media/LOpsoo3yRDHbi/200.gif','https://media1.giphy.com/media/11UV14XPbGFyCc/200.gif','https://media4.giphy.com/media/KqFsOCQZweNhK/200.gif','https://media4.giphy.com/media/qN7NZR3Q5R2mY/200.gif','https://media3.giphy.com/media/qraiyjvXXP2oM/200.gif','https://media4.giphy.com/media/VzbN9gupkkXp6/200.gif','https://media2.giphy.com/media/Qr4JSl1M86qLC/200.gif','https://media3.giphy.com/media/h38BLEj9QOx0I/200.gif','https://media0.giphy.com/media/BJMIzBe8OZyWQ/200.gif','https://media3.giphy.com/media/RSzvGBuoQRlp6/200.gif']
+            
             import random
             gifurl = random.choice (gifs)
             return gifurl
@@ -219,12 +226,7 @@ class Command(BaseCommand):
         @listen_to('^gamebot challenge (.*)',re.IGNORECASE)
         def challenge(message,opponentname):
             #setup
-            sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-            if not sender:
-                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['real_name'])
-            else:
-                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-            sender = sender.lower()
+            sender = _get_sender_username(message)
             opponentname = _get_user_username(message,opponentname)
 
             #body
@@ -240,13 +242,9 @@ class Command(BaseCommand):
         def taunt(message,opponentname):
 
             #setup
-            sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-            if not sender:
-                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['real_name'])
-            else:
-                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-            sender = sender.lower()
+            sender = _get_sender_username(message)
             opponentname = _get_user_username(message,opponentname)
+
             #body
             gifurl = get_gif('taunt')
 
@@ -262,13 +260,9 @@ class Command(BaseCommand):
 
         def _predict(message,opponentname,seasoned=False,show_trend=False):
             #setup
-            sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-            if not sender:
-                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['real_name'])
-            else:
-                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-            sender = sender.lower()
+            sender = _get_sender_username(message)
             opponentname = _get_user_username(message,opponentname)
+
             active_season , range_start_date = get_active_season(seasoned)
 
             #body
@@ -321,12 +315,7 @@ class Command(BaseCommand):
         @listen_to('^gamebot accept (.*)',re.IGNORECASE)
         def accepted(message,opponentname):
             #setup
-            sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-            if not sender:
-                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['real_name'])
-            else:
-                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-            sender = sender.lower()
+            sender = _get_sender_username(message)
             opponentname = _get_user_username(message,opponentname)
 
             gifurl = get_gif('accepted')
@@ -461,12 +450,7 @@ class Command(BaseCommand):
                 time = current_time()
 
                 #setup
-                sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-                if not sender:
-                    sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['real_name'])
-                else:
-                    sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-                sender = sender.lower()
+                sender = _get_sender_username(message)
                 opponentname = _get_user_username(message,opponentname)
                 if sender == opponentname:
                     raise Exception("You can't beat to yourself, please specify correct opponent.")
