@@ -461,6 +461,7 @@ class Command(BaseCommand):
                 winner = get_stats(sender)
                 loser = get_stats(opponentname)
                 ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
+                logging.debug("DEBUG: winner: {}, loser: {}, winner_elo_diff: {}, loser_elo_diff: {}, winner_wins: {}, loser_losses: {}".format(winner,loser,winner_diff,loser_diff,winner_wins,loser_losses))
                 rankings_order()
 
             ##########
@@ -478,6 +479,7 @@ class Command(BaseCommand):
                 winner = get_stats(opponentname)
                 loser = get_stats(sender)
                 ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
+                logging.debug("DEBUG: winner: {}, loser: {}, winner_elo_diff: {}, loser_elo_diff: {}, winner_wins: {}, loser_losses: {}".format(winner,loser,winner_diff,loser_diff,winner_wins,loser_losses))
                 rankings_order()
 
             ##########
