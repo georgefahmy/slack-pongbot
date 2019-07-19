@@ -183,7 +183,6 @@ class Command(BaseCommand):
         def individual_history(message,user):
             #input sanitization
             user = _get_user_username(message,user)
-            # logging.debug(user)
             HISTORY_SIZE_LIMIT = 30
             history_str = "\n".join(list( [ "* " + str(game) for game in Game.objects.filter(Q(winner=user) | Q(loser=user)).order_by('-created_on')[:HISTORY_SIZE_LIMIT] ]  ))
 
@@ -484,7 +483,7 @@ class Command(BaseCommand):
 
             ##########
 
-            logging.debug("DEBUG: {} {} {}".format(opponentname,wins,losses))
+            logging.debug("DEBUG: opponent: {}, wins: {}, losses: {}".format(opponentname,wins,losses))
             wins = int(wins)
             losses = int(losses)
             message.react("white_check_mark")
