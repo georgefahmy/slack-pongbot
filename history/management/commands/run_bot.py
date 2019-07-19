@@ -366,7 +366,7 @@ class Command(BaseCommand):
             winner_diff = new_winner_elo - old_winner_elo
             loser_diff = new_loser_elo - old_loser_elo
 
-            return ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total
+            return new_winner_elo, new_loser_elo, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total
 ##########
         def rankings_order():
             list_of_users = list(Rankings.objects.values_list('user',flat=True).order_by('-ranking'))
@@ -460,8 +460,8 @@ class Command(BaseCommand):
                 newgame = Game.objects.create(winner=sender,loser=opponentname,created_on=time,modified_on=time)
                 winner = get_stats(sender)
                 loser = get_stats(opponentname)
-                ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
-                logging.debug("DEBUG: winner: {}, loser: {}, winner_elo_diff: {}, loser_elo_diff: {}, winner_wins: {}, loser_losses: {}".format(winner,loser,winner_diff,loser_diff,winner_wins,loser_losses))
+                new_winner_elo, new_loser_elo, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
+                logging.debug("DEBUG: winner: {}, loser: {}, winner_elo_diff: +{},({}), loser_elo_diff: {},({}), winner_wins: {}, loser_losses: {}".format(sender,opponentname,winner_diff,new_winner_elo,loser_diff,new_loser_elo,winner_wins,loser_losses))
                 rankings_order()
 
             ##########
@@ -478,8 +478,8 @@ class Command(BaseCommand):
                 newgame = Game.objects.create(winner=opponentname,loser=sender,created_on=time,modified_on=time)
                 winner = get_stats(opponentname)
                 loser = get_stats(sender)
-                ranking_results, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
-                logging.debug("DEBUG: winner: {}, loser: {}, winner_elo_diff: {}, loser_elo_diff: {}, winner_wins: {}, loser_losses: {}".format(winner,loser,winner_diff,loser_diff,winner_wins,loser_losses))
+                new_winner_elo, new_loser_elo, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
+                logging.debug("DEBUG: winner: {}, loser: {}, winner_elo_diff: +{},({}), loser_elo_diff: {},({}), winner_wins: {}, loser_losses: {}".format(opponentname,sender,winner_diff,new_winner_elo,loser_diff,new_loser_elo,winner_wins,loser_losses))
                 rankings_order()
 
             ##########
