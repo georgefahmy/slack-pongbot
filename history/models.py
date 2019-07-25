@@ -30,3 +30,17 @@ class Rankings(models.Model):
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     total = models.IntegerField(default=0)
+
+class DoublesGame(models.Model):
+    winning_team = models.ForeignKey('history.Teams',to_field='name',related_name='winning_team')
+    losing_team = models.ForeignKey('history.Teams',to_field='name',related_name='losing_team')
+    created_on = models.DateTimeField('created_on')
+
+class Teams(models.Model):
+    player_1 = models.CharField(max_length=200)
+    player_2 = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, null=True,unique=True)
+    ranking = models.IntegerField(default=1000)
+    wins = models.IntegerField(default=0)
+    losses = models.IntegerField(default=0)
+    total = models.IntegerField(default=0)

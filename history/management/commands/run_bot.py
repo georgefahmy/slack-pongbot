@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
-from history.models import Game, Season, Rankings
+from history.models import Game, Season, Rankings, Teams,DoublesGame
 from datetime import datetime, date
 from pytz import timezone as tzone
 from collections import Counter
@@ -82,6 +82,8 @@ class Command(BaseCommand):
                 "    `gb <@player> elo` -- shows the player's elo ranking \n" +\
                 "    `gb global history` -- displays history for table-tennis\n" +\
                 "    `gb season` -- displays season information for table-tennis\n\n" +\
+                " _Doubles_: \n" +\
+                "    `gb doubles @partner <wins>-<losses> @opponent1 @opponent2` -- record doubles matches \n\n" +\
                 " _About_: \n" +\
                 "    `gb help` -- displays help menu (this thing)\n" +\
                 " You may also call me by my full name: `gamebot <command>`." +\
@@ -388,7 +390,7 @@ class Command(BaseCommand):
             elo = get_stats(player).ranking
             message.reply("{}'s elo ranking is {}".format(player,elo),in_thread=True)
 
-##########
+########## DEBUGGING TOOL ONLY ##########
         @listen_to('^gb update rankings')
         def create_rankings(message):
             time = current_time()
@@ -438,6 +440,8 @@ class Command(BaseCommand):
 
             from pprint import pprint
             pprint(stats_by_user)
+
+########## DEBUGGING TOOL ONLY ##########
 
 ##########
         @listen_to('^gb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
@@ -499,6 +503,134 @@ class Command(BaseCommand):
                 won2(message,opponentname)
             for i in range(losses):
                 loss2(message,opponentname)
+
+########## Doubles games
+        def get_team_stats(team):
+
+            team_stats = Teams.objects.get_or_create(name=team['name'])[0]
+            return team_stats
+
+        def teams(message,partner,opponent1,opponent2):
+
+            #Team1 (sender + partner)
+            sender = _get_sender_username(message)
+            partner = _get_user_username(message,partner)
+
+            team1_list = [sender, partner]
+            team1_list.sort()
+            team1_name = str(team1_list[0]+"_"+team1_list[1])
+
+            #team dict for easy referencing later
+            team1 = {}
+            team1['player_1'] = team1_list[0]
+            team1['player_2'] = team1_list[1]
+            team1['name'] = team1_name
+
+            #Team2 (opponent1 + opponent2)
+            opponent1 = _get_user_username(message,opponent1)
+            opponent2 = _get_user_username(message,opponent2)
+
+            team2_list = [opponent1, opponent2]
+            team2_list.sort()
+            team2_name = str(team2_list[0]+"_"+team2_list[1])
+
+            #team dict for easy referencing later
+            team2 = {}
+            team2['player_1'] = team2_list[0]
+            team2['player_2'] = team2_list[1]
+            team2['name'] = team2_name
+
+            logging.debug("DEBUG Team1 {}".format(team1))
+            logging.debug("DEBUG Team2 {}".format(team2))
+
+            return team1, team2
+
+        def update_doubles_stats(team_one,team_two):
+            winning_team = get_team_stats(team_one)
+            losing_team = get_team_stats(team_two)
+
+            old_winning_team_elo = winning_team.ranking
+            old_winning_team_wins = winning_team.wins
+            old_winning_team_total = winning_team.total
+
+            old_losing_team_elo = losing_team.ranking
+            old_losing_team_losses = losing_team.losses
+            old_losing_team_total = losing_team.total
+
+            team_ranking_results = rate_1vs1(old_winning_team_elo,old_losing_team_elo)
+
+            new_winning_team_elo = int(round(team_ranking_results[0],0))
+            new_winning_team_wins = old_winning_team_wins+1
+            new_winning_team_total = old_winning_team_total+1
+
+            new_losing_team_elo = int(round(team_ranking_results[1],0))
+            new_losing_team_losses = old_losing_team_losses+1
+            new_losing_team_total = old_losing_team_total+1
+
+            winning_team.player_1 = team_one['player_1']
+            winning_team.player_2 = team_one['player_2']
+            winning_team.ranking = new_winning_team_elo
+            winning_team.wins = new_winning_team_wins
+            winning_team.total = new_winning_team_total
+
+            losing_team.player_1 = team_two['player_1']
+            losing_team.player_2 = team_two['player_2']
+            losing_team.ranking = new_losing_team_elo
+            losing_team.losses = new_losing_team_losses
+            losing_team.total = new_losing_team_total
+
+            winning_team.save()
+            losing_team.save()
+
+            return winning_team, losing_team
+
+        @listen_to('^gb doubles (<@.*) ([0-9]+)-([0-9]+) (<@.*) (<@.*)')
+        def record_doubles(message, partner, wins, losses, opponent1, opponent2):
+
+            team1, team2 = teams(message,partner,opponent1,opponent2)
+
+            def doubles_win(message, partner, wins, losses, opponent1, opponent2):
+                time = current_time()
+
+                #setup
+                team1, team2 = teams(message,partner,opponent1,opponent2)
+                if team1 == team2:
+                    raise Exception("You can't beat to yourself, please specify correct opponent.")
+
+                winning_team, losing_team = update_doubles_stats(team1,team2)
+                doublesgame = DoublesGame.objects.create(winning_team=winning_team,losing_team=losing_team,created_on=time)
+
+
+                # logging.debug("DEBUG: winning_team: {}, losing_team: {}, winning_team_elo_diff: +{},({}), losing_team_elo_diff: {},({}), winning_team_wins: {}, losing_team_losses: {}".format())
+
+            def doubles_loss(message, partner, wins, losses, opponent1, opponent2):
+                time = current_time()
+
+                #setup
+                team1, team2 = teams(message,partner,opponent1,opponent2)
+                if team1 == team2:
+                    raise Exception("You can't beat to yourself, please specify correct opponent.")
+
+                winning_team, losing_team = update_doubles_stats(team2,team1)
+                doublesgame = DoublesGame.objects.create(winning_team=winning_team,losing_team=losing_team,created_on=time)
+
+                # logging.debug("DEBUG: winning_team: {}, losing_team: {}, winning_team_elo_diff: +{},({}), losing_team_elo_diff: {},({}), winning_team_wins: {}, losing_team_losses: {}".format())
+
+            wins = int(wins)
+            losses = int(losses)
+            message.react("white_check_mark")
+            if wins == 1 and losses != 1:
+                message.reply("Recorded {} win and {} losses between {} and {}".format(wins,losses,team1['name'],team2['name']),in_thread=True)
+            elif wins != 1 and losses == 1:
+                message.reply("Recorded {} wins and {} loss  between {} and {}".format(wins,losses,team1['name'],team2['name']),in_thread=True)
+            elif wins == 1 and losses == 1:
+                message.reply("Recorded {} win and {} loss  between {} and {}".format(wins,losses,team1['name'],team2['name']),in_thread=True)
+            else:
+                message.reply("Recorded {} wins and {} losses  between {} and {}".format(wins,losses,team1['name'],team2['name']),in_thread=True)
+            for i in range(wins):
+                doubles_win(message, partner, wins, losses, opponent1, opponent2)
+            for i in range(losses):
+                doubles_loss(message, partner, wins, losses, opponent1, opponent2)
 
 ##########
 
