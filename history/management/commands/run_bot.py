@@ -258,7 +258,6 @@ class Command(BaseCommand):
         @listen_to('^gb predict (.*)',re.IGNORECASE)
         @listen_to('^gamebot predict (.*)',re.IGNORECASE)
         def predict(message,opponentname,seasoned=False):
-            _predict(message,opponentname,True,False)
             _predict(message,opponentname,False,True)
 
         def _predict(message,opponentname,seasoned=False,show_trend=False):
