@@ -379,7 +379,7 @@ class Command(BaseCommand):
                 rankings[player] = { 'name': user_stats.user, 'ranking': user_stats.ranking, 'wins' : user_stats.wins, 'losses': user_stats.losses, 'total': user_stats.total ,'win_pct': win_pct}
 
             rankings = sorted(rankings.items(), key=lambda x: -1 * x[1]['ranking'])
-            stats_str = "\n ".join([  " * {}({}): {}/{} ({}%)".format(player[1]['name'],player[1]['ranking'],player[1]['wins'],player[1]['losses'],player[1]['win_pct'])  for player in rankings ])
+            stats_str = "\n ".join([  " #{} {}({}): {}/{} ({}%)".format(rankings.index(player)+1 ,player[1]['name'],player[1]['ranking'],player[1]['wins'],player[1]['losses'],player[1]['win_pct'])  for player in rankings ])
 
             return stats_str
 ##########
