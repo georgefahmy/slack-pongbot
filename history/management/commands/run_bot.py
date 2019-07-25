@@ -97,8 +97,9 @@ class Command(BaseCommand):
         @listen_to('^gamebot version', re.IGNORECASE)
         @listen_to('^gb version', re.IGNORECASE)
         def version(message):
-            version_message="Version 1.4.1 \n\n"+\
+            version_message="Version 2.0 \n\n"+\
                 " Version history \n" +\
+                " * `2.0` -- add support for doubles matches! \n" +\
                 " * `1.4.1` -- add individual elo ranking message. \n" +\
                 " * `1.4` -- gamebot first release for use. \n" +\
                 " * `1.3` -- updated the database to track stats instead of calculating them live. \n" +\
