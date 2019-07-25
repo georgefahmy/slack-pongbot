@@ -92,7 +92,7 @@ class Command(BaseCommand):
                 # "    `gb alltime leaderboard table-tennis` -- displays the all time leaderboard for table-tennis\n" +\
                 # "    `gb version` -- displays my software version\n\n" +\
 
-            message.reply(help_message)
+            message.reply(help_message,in_thread=True)
 
 
         @listen_to('^gamebot version', re.IGNORECASE)
@@ -108,7 +108,7 @@ class Command(BaseCommand):
                 " * `1.1` -- added `gb result <@opponent> <wins> <losses>` for recording results quicker \n" +\
                 " * `1.0` -- added `who next`, added `gb @user history` -- specific user history \n" +\
                 ""
-            message.reply(version_message)
+            message.reply(version_message,in_thread=True)
 
         def get_active_season(seasoned):
             range_start_date = default_start
@@ -147,8 +147,8 @@ class Command(BaseCommand):
             active_season, start_on = get_active_season(True)
 
             #msg back to users
-            msg_str = "{} is active. \nUse `pongbot end season` to end this season.".format(active_season)
-            message.send(msg_str)
+            msg_str = "{} is active. \nUse `gamebot end season` to end this season.".format(active_season)
+            message.reply(msg_str,in_thread=True)
 
         @listen_to('^gamebot end season',re.IGNORECASE)
         @listen_to('^gb end season',re.IGNORECASE)
@@ -168,7 +168,7 @@ class Command(BaseCommand):
 
             #msg back to users
             msg_str = "{} ended.\n\n {} opened".format(active_season,new_season)
-            message.send(msg_str)
+            message.reply(msg_str,in_thread=True)
 
         @listen_to('^gamebot global history',re.IGNORECASE)
         @listen_to('^gb global history',re.IGNORECASE)
@@ -180,7 +180,7 @@ class Command(BaseCommand):
                 history_str = "History for last {} games: \n\n{}".format(str(HISTORY_SIZE_LIMIT),history_str)
                 message.reply(history_str, in_thread=True)
             else:
-                message.send('No history found.')
+                message.reply('No history found.',in_thread=True)
 
         @listen_to('^gamebot (<@.*) history',re.IGNORECASE)
         @listen_to('^gb (<@.*) history',re.IGNORECASE)
@@ -219,7 +219,7 @@ class Command(BaseCommand):
                 full_message = history_str+this_message+elo_message
                 message.reply(full_message, in_thread=True)
             else:
-                message.send('No history found')
+                message.reply('No history found',in_thread=True)
 
             # message.reply(this_message, in_thread=True)
             #
@@ -238,7 +238,7 @@ class Command(BaseCommand):
 
             #send response
             this_message = "{}, {} challenged you to a game!. Accept like this: `{}` \n\n{}".format(opponentname,sender,accept_message,gifurl)
-            message.send(this_message)
+            message.reply(this_message,in_thread=True)
 
         @listen_to('^gb taunt (.*)',re.IGNORECASE)
         @listen_to('^gamebot taunt (.*)',re.IGNORECASE)
@@ -253,7 +253,7 @@ class Command(BaseCommand):
 
             #send response
             this_message = "{}, {} taunted you {}".format(opponentname,sender,gifurl)
-            message.send(this_message)
+            message.reply(this_message,in_thread=True)
 
         @listen_to('^gb predict (.*)',re.IGNORECASE)
         @listen_to('^gamebot predict (.*)',re.IGNORECASE)
@@ -272,7 +272,7 @@ class Command(BaseCommand):
             games = (Game.objects.filter(created_on__gt=range_start_date,winner=sender,loser=opponentname)) | (Game.objects.filter(created_on__gt=range_start_date,winner=opponentname,loser=sender))
             games = games.order_by('-created_on')
             if not games:
-                message.send("No games found between {} and {}".format(sender,opponentname))
+                message.reply("No games found between {} and {}".format(sender,opponentname),in_thread=True)
                 return;
 
             stats_by_user = {}
@@ -311,7 +311,7 @@ class Command(BaseCommand):
                                 longest_streak = "{}:{}".format(streak_char,streak_size)
                 this_message = this_message + "\nTrend: " + trend + ( ". Longest streak: {}".format(longest_streak) if longest_streak else "" )
 
-            message.send(this_message)
+            message.reply(this_message,in_thread=True)
 
 
         @listen_to('^gb accept (.*)',re.IGNORECASE)
@@ -325,7 +325,7 @@ class Command(BaseCommand):
 
             #send response
             this_message = "{}, {} accepted your challenge! \n\n{}".format(opponentname,sender,gifurl)
-            message.send(this_message)
+            message.reply(this_message,in_thread=True)
 
 
 ##########
@@ -684,7 +684,7 @@ class Command(BaseCommand):
 
             opponent = choice(user_list)
 
-            message.send("{}, you should play {} next! \n Do you want to challenge them? Type `pb challenge {}`".format(sender,opponent,opponent))
+            message.reply("{}, you should play {} next! \n Do you want to challenge them? Type `pb challenge {}`".format(sender,opponent,opponent),in_thread=True)
 
 #########
         @listen_to('^gb challenge$',re.IGNORECASE)
@@ -692,7 +692,7 @@ class Command(BaseCommand):
         @listen_to('^gamebot challenge$',re.IGNORECASE)
         @listen_to('^gamebot accept$',re.IGNORECASE)
         def error_history_2(message):
-            message.reply('Please specify an opponent handle.')
+            message.reply('Please specify an opponent handle.',in_thread=True)
 
         @listen_to('^gb challenge (.*)$',re.IGNORECASE)
         @listen_to('^gb accept (.*)$',re.IGNORECASE)
