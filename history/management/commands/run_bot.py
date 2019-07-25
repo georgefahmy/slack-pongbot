@@ -84,6 +84,7 @@ class Command(BaseCommand):
                 "    `gb season` -- displays season information for table-tennis\n\n" +\
                 " _Doubles_: \n" +\
                 "    `gb doubles @partner <wins>-<losses> @opponent1 @opponent2` -- record doubles matches \n\n" +\
+                "    `gb doubles leaderboard` -- displays the doubles teams leaderboard \n\n" +\
                 " _About_: \n" +\
                 "    `gb help` -- displays help menu (this thing)\n" +\
                 " You may also call me by my full name: `gamebot <command>`." +\
@@ -99,7 +100,7 @@ class Command(BaseCommand):
         def version(message):
             version_message="Version 2.0 \n\n"+\
                 " Version history \n" +\
-                " * `2.0` -- add support for doubles matches! \n" +\
+                " * `2.0` -- add support for doubles matches!. \n" +\
                 " * `1.4.1` -- add individual elo ranking message. \n" +\
                 " * `1.4` -- gamebot first release for use. \n" +\
                 " * `1.3` -- updated the database to track stats instead of calculating them live. \n" +\
@@ -506,9 +507,29 @@ class Command(BaseCommand):
                 loss2(message,opponentname)
 
 ########## Doubles games
+        @listen_to('^gb doubles leaderboard',re.IGNORECASE)
+        def doubles_leaderboard(message):
+            team_stats_str = doubles_rankings()
+            message.reply(team_stats_str,in_thread=True)
+
+        def doubles_rankings():
+            list_of_teams = list(Teams.objects.values_list('name',flat=True).order_by('-ranking'))
+            logging.debug(list_of_teams)
+            team_rankings = {}
+            for team in list_of_teams:
+                logging.debug(team)
+                team_stats = get_team_stats(team)
+                win_pct = round(team_stats.wins*1.0/team_stats.total,2)*100
+                team_rankings[team] = { 'name': team_stats.name, 'ranking': team_stats.ranking, 'wins' : team_stats.wins, 'losses': team_stats.losses, 'total': team_stats.total ,'win_pct': win_pct}
+
+            team_rankings = sorted(team_rankings.items(), key=lambda x: -1 * x[1]['ranking'])
+            team_stats_str = "\n ".join([  " * {}({}): {}/{} ({}%)".format(team[1]['name'],team[1]['ranking'],team[1]['wins'],team[1]['losses'],team[1]['win_pct'])  for team in team_rankings ])
+
+            return team_stats_str
+
         def get_team_stats(team):
 
-            team_stats = Teams.objects.get_or_create(name=team['name'])[0]
+            team_stats = Teams.objects.get_or_create(name=team)[0]
             return team_stats
 
         def teams(message,partner,opponent1,opponent2):
@@ -547,8 +568,8 @@ class Command(BaseCommand):
             return team1, team2
 
         def update_doubles_stats(team_one,team_two):
-            winning_team = get_team_stats(team_one)
-            losing_team = get_team_stats(team_two)
+            winning_team = get_team_stats(team_one['name'])
+            losing_team = get_team_stats(team_two['name'])
 
             old_winning_team_elo = winning_team.ranking
             old_winning_team_wins = winning_team.wins
