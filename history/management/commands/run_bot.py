@@ -98,8 +98,9 @@ class Command(BaseCommand):
         @listen_to('^gamebot version', re.IGNORECASE)
         @listen_to('^gb version', re.IGNORECASE)
         def version(message):
-            version_message="Version 2.0 \n\n"+\
+            version_message="Version 2.1 \n\n"+\
                 " Version history \n" +\
+                " * `2.1` -- update `gb results...` to display leaderboard information . \n" +\
                 " * `2.0` -- add support for doubles matches!. \n" +\
                 " * `1.4.1` -- add individual elo ranking message. \n" +\
                 " * `1.4` -- gamebot first release for use. \n" +\
@@ -515,7 +516,7 @@ class Command(BaseCommand):
             opponent = _get_user_username(message,opponentname)
             old_sender_rank = get_stats(sender).ranking
             old_opponent_rank = get_stats(opponent).ranking
-            
+
             for i in range(wins):
                 won2(message,opponentname)
             for i in range(losses):
