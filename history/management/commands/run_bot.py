@@ -444,6 +444,26 @@ class Command(BaseCommand):
 
 ########## DEBUGGING TOOL ONLY ##########
 
+        def truncated_leaderboard(user):
+            list_of_users = list(Rankings.objects.values_list('user',flat=True).order_by('-ranking'))
+            rankings = {}
+
+            if list_of_users.index(user) == 0:
+                indecies = [0,3]
+            else:
+                indecies = [list_of_users.index(user)-1,list_of_users.index(user)+2]
+
+            i = indecies[0]+1
+
+            for player in list_of_users[indecies[0]:indecies[1]]:
+                user_stats = get_stats(player)
+                win_pct = round(user_stats.wins*1.0/user_stats.total,2)*100
+                rankings[player] = { 'rank': i, 'name': user_stats.user, 'ranking': user_stats.ranking, 'wins' : user_stats.wins, 'losses': user_stats.losses, 'total': user_stats.total ,'win_pct': win_pct}
+                i+=1
+
+            rankings = sorted(rankings.items(), key=lambda x: -1 * x[1]['ranking'])
+            stats_str = "\n ".join([  " #{} {}({}): {}/{} ({}%)".format(player[1]['rank'],player[1]['name'],player[1]['ranking'],player[1]['wins'],player[1]['losses'],player[1]['win_pct'])  for player in rankings ])
+            return stats_str
 ##########
         @listen_to('^gb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
         @listen_to('^gb results (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
@@ -466,7 +486,6 @@ class Command(BaseCommand):
                 loser = get_stats(opponentname)
                 new_winner_elo, new_loser_elo, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
                 logging.debug("DEBUG: winner: {}, loser: {}, winner_elo_diff: +{},({}), loser_elo_diff: {},({}), winner_wins: {}, loser_losses: {}".format(sender,opponentname,winner_diff,new_winner_elo,loser_diff,new_loser_elo,winner_wins,loser_losses))
-                rankings_order()
 
             ##########
             def loss2(message, opponentname):
@@ -484,7 +503,6 @@ class Command(BaseCommand):
                 loser = get_stats(sender)
                 new_winner_elo, new_loser_elo, winner_diff, loser_diff, winner_wins, winner_total, loser_losses, loser_total = update_stats(winner, loser)
                 logging.debug("DEBUG: winner: {}, loser: {}, winner_elo_diff: +{},({}), loser_elo_diff: {},({}), winner_wins: {}, loser_losses: {}".format(opponentname,sender,winner_diff,new_winner_elo,loser_diff,new_loser_elo,winner_wins,loser_losses))
-                rankings_order()
 
             ##########
 
@@ -492,18 +510,47 @@ class Command(BaseCommand):
             wins = int(wins)
             losses = int(losses)
             message.react("white_check_mark")
-            if wins == 1 and losses != 1:
-                message.reply("Recorded {} win and {} losses against {}".format(wins,losses,opponentname),in_thread=True)
-            elif wins != 1 and losses == 1:
-                message.reply("Recorded {} wins and {} loss against {}".format(wins,losses,opponentname),in_thread=True)
-            elif wins == 1 and losses == 1:
-                message.reply("Recorded {} win and {} loss against {}".format(wins,losses,opponentname),in_thread=True)
-            else:
-                message.reply("Recorded {} wins and {} losses against {}".format(wins,losses,opponentname),in_thread=True)
+
+            sender = _get_sender_username(message)
+            opponent = _get_user_username(message,opponentname)
+            old_sender_rank = get_stats(sender).ranking
+            old_opponent_rank = get_stats(opponent).ranking
+            
             for i in range(wins):
                 won2(message,opponentname)
             for i in range(losses):
                 loss2(message,opponentname)
+
+            new_sender_rank = get_stats(sender).ranking
+            new_opponent_rank = get_stats(opponent).ranking
+
+            sender_elo_diff = new_sender_rank - old_sender_rank
+            opponent_elo_diff = new_opponent_rank - old_opponent_rank
+
+            sender_str = "{} ({} -> {})  {} \n".format(sender,old_sender_rank,new_sender_rank,sender_elo_diff)
+            opponent_str = "{} ({} -> {})  {} \n\n".format(opponent,old_opponent_rank,new_opponent_rank,opponent_elo_diff)
+
+            results_str = sender_str+opponent_str
+
+            sender_leaderboard = truncated_leaderboard(sender)
+            opponent_leaderboard = truncated_leaderboard(opponent)
+            results_str = results_str+sender_leaderboard+"\n\n"+opponent_leaderboard
+
+            if wins == 1 and losses != 1:
+                str = "Recorded {} win and {} losses against {}\n\n".format(wins,losses,opponentname)
+                message.reply(str+results_str,in_thread=True)
+
+            elif wins != 1 and losses == 1:
+                str = "Recorded {} wins and {} loss against {}\n\n".format(wins,losses,opponentname)
+                message.reply(str+results_str,in_thread=True)
+
+            elif wins == 1 and losses == 1:
+                str = "Recorded {} win and {} loss against {}\n\n".format(wins,losses,opponentname)
+                message.reply(str+results_str,in_thread=True)
+
+            else:
+                str = "Recorded {} wins and {} losses against {}\n\n".format(wins,losses,opponentname)
+                message.reply(str+results_str,in_thread=True)
 
 ########## Doubles games
         @listen_to('^gb doubles leaderboard',re.IGNORECASE)
