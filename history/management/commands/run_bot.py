@@ -514,10 +514,8 @@ class Command(BaseCommand):
 
         def doubles_rankings():
             list_of_teams = list(Teams.objects.values_list('name',flat=True).order_by('-ranking'))
-            logging.debug(list_of_teams)
             team_rankings = {}
             for team in list_of_teams:
-                logging.debug(team)
                 team_stats = get_team_stats(team)
                 win_pct = round(team_stats.wins*1.0/team_stats.total,2)*100
                 team_rankings[team] = { 'name': team_stats.name, 'ranking': team_stats.ranking, 'wins' : team_stats.wins, 'losses': team_stats.losses, 'total': team_stats.total ,'win_pct': win_pct}
