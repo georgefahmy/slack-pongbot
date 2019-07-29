@@ -528,6 +528,12 @@ class Command(BaseCommand):
             sender_elo_diff = new_sender_rank - old_sender_rank
             opponent_elo_diff = new_opponent_rank - old_opponent_rank
 
+            if sender_elo_diff > 0:
+                sender_elo_diff = "+{}".format(sender_elo_diff)
+
+            if opponent_elo_diff > 0:
+                opponent_elo_diff = "+{}".format(opponent_elo_diff)
+
             sender_str = "{} ({} -> {})  {} \n".format(sender,old_sender_rank,new_sender_rank,sender_elo_diff)
             opponent_str = "{} ({} -> {})  {} \n\n".format(opponent,old_opponent_rank,new_opponent_rank,opponent_elo_diff)
 
