@@ -657,7 +657,7 @@ class Command(BaseCommand):
 
             return winning_team, losing_team
 
-        @listen_to('^gb doubles (<@.*) ([0-9]+)-([0-9]+) (<@.*) (<@.*)')
+        @listen_to('^gb doubles (<@.*) ([0-9]+)-([0-9]+) (<@.*) (<@.*)',re.IGNORECASE)
         def record_doubles(message, partner, wins, losses, opponent1, opponent2):
 
             team1, team2 = teams(message,partner,opponent1,opponent2)
