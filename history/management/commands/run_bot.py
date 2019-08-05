@@ -65,6 +65,7 @@ class Command(BaseCommand):
             gifurl = random.choice (gifs)
             return gifurl
 
+        @respond_to('^gb help', re.IGNORECASE)
         @listen_to('^gamebot help', re.IGNORECASE)
         @listen_to('^gb help', re.IGNORECASE)
         def help(message):
@@ -94,7 +95,7 @@ class Command(BaseCommand):
 
             message.reply(help_message,in_thread=True)
 
-
+        @respond_to('^gb version', re.IGNORECASE)
         @listen_to('^gamebot version', re.IGNORECASE)
         @listen_to('^gb version', re.IGNORECASE)
         def version(message):
@@ -132,6 +133,7 @@ class Command(BaseCommand):
         def unseasoned_leaderboard(message):
             return _leaderboard(message,False)
 
+        @respond_to('^gb leaderboard',re.IGNORECASE)
         @listen_to('^gamebot leaderboard',re.IGNORECASE)
         @listen_to('^gb leaderboard', re.IGNORECASE)
         def seasoned_leaderboard(message):
@@ -141,6 +143,7 @@ class Command(BaseCommand):
             stats_str = rankings_order()
             message.reply(stats_str,in_thread=True)
 
+        @respond_to('^gb season',re.IGNORECASE)
         @listen_to('^gamebot season',re.IGNORECASE)
         @listen_to('^gb season',re.IGNORECASE)
         def season(message):
@@ -171,6 +174,7 @@ class Command(BaseCommand):
             msg_str = "{} ended.\n\n {} opened".format(active_season,new_season)
             message.reply(msg_str,in_thread=True)
 
+        @respond_to('^gb global history',re.IGNORECASE)
         @listen_to('^gamebot global history',re.IGNORECASE)
         @listen_to('^gb global history',re.IGNORECASE)
         def history(message):
@@ -183,6 +187,7 @@ class Command(BaseCommand):
             else:
                 message.reply('No history found.',in_thread=True)
 
+        @respond_to('^gb (<@.*) history',re.IGNORECASE)
         @listen_to('^gamebot (<@.*) history',re.IGNORECASE)
         @listen_to('^gb (<@.*) history',re.IGNORECASE)
         def individual_history(message,user):
@@ -384,6 +389,7 @@ class Command(BaseCommand):
 
             return stats_str
 ##########
+        @respond_to('^gb (<@.*) elo',re.IGNORECASE)
         @listen_to('^gamebot (<@.*) elo',re.IGNORECASE)
         @listen_to('^gb (<@.*) elo',re.IGNORECASE)
         def player_elo(message,user):
@@ -466,6 +472,11 @@ class Command(BaseCommand):
             stats_str = "\n ".join([  " #{} {}({}): {}/{} ({}%)".format(player[1]['rank'],player[1]['name'],player[1]['ranking'],player[1]['wins'],player[1]['losses'],player[1]['win_pct'])  for player in rankings ])
             return stats_str
 ##########
+
+        @respond_to('^gb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
+        @respond_to('^gb results (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
+        @respond_to('^gb result (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
+        @respond_to('^gb results (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
         @listen_to('^gb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
         @listen_to('^gb results (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
         @listen_to('^gb result (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
@@ -560,6 +571,7 @@ class Command(BaseCommand):
                 message.reply(str+results_str,in_thread=True)
 
 ########## Doubles games
+        @respond_to('^gb doubles leaderboard',re.IGNORECASE)
         @listen_to('^gb doubles leaderboard',re.IGNORECASE)
         def doubles_leaderboard(message):
             team_stats_str = doubles_rankings()
@@ -657,6 +669,7 @@ class Command(BaseCommand):
 
             return winning_team, losing_team
 
+        @respond_to('^gb doubles (<@.*) ([0-9]+)-([0-9]+) (<@.*) (<@.*)',re.IGNORECASE)
         @listen_to('^gb doubles (<@.*) ([0-9]+)-([0-9]+) (<@.*) (<@.*)',re.IGNORECASE)
         def record_doubles(message, partner, wins, losses, opponent1, opponent2):
 
