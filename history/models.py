@@ -44,3 +44,9 @@ class Teams(models.Model):
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     total = models.IntegerField(default=0)
+
+class Logs(models.Model):
+    created_on = models.DateTimeField('created_on')
+    requester = models.CharField(max_length=200)
+    content = models.TextField(name='log_message')
+    slack_link = models.URLField(name='slack_link')

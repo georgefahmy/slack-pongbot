@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
-from history.models import Game, Season, Rankings, Teams,DoublesGame
+from history.models import Game, Season, Rankings, Teams, DoublesGame, Logs
 from datetime import datetime, date
 from pytz import timezone as tzone
 from collections import Counter
@@ -65,6 +65,19 @@ class Command(BaseCommand):
             gifurl = random.choice (gifs)
             return gifurl
 
+        def add_log(message):
+            base_link = 'https://zoox.slack.com/archives/'
+            ts = message._body['event_ts'].replace('.','')
+            channel = message._body['channel']
+
+            link = base_link+channel+'/p'+ts
+
+            time = current_time()
+            requester = _get_sender_username(message)
+            content = message.body['text']
+            Logs.objects.get_or_create(created_on=time,requester=requester,log_message=content,slack_link=link)[0]
+
+
         @respond_to('^gb help', re.IGNORECASE)
         @listen_to('^gamebot help', re.IGNORECASE)
         @listen_to('^gb help', re.IGNORECASE)
@@ -92,7 +105,7 @@ class Command(BaseCommand):
                 " "
                 # "    `gb alltime leaderboard table-tennis` -- displays the all time leaderboard for table-tennis\n" +\
                 # "    `gb version` -- displays my software version\n\n" +\
-
+            add_log(message)
             message.reply(help_message,in_thread=True)
 
         @respond_to('^gb version', re.IGNORECASE)
