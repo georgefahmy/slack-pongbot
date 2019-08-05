@@ -123,6 +123,7 @@ class Command(BaseCommand):
                 " * `1.1` -- added `gb result <@opponent> <wins> <losses>` for recording results quicker \n" +\
                 " * `1.0` -- added `who next`, added `gb @user history` -- specific user history \n" +\
                 ""
+            add_log(message)
             message.reply(version_message,in_thread=True)
 
         def get_active_season(seasoned):
@@ -154,6 +155,7 @@ class Command(BaseCommand):
 
         def _leaderboard(message,seasoned=False):
             stats_str = rankings_order()
+            add_log(message)
             message.reply(stats_str,in_thread=True)
 
         @respond_to('^gb season',re.IGNORECASE)
@@ -165,6 +167,7 @@ class Command(BaseCommand):
 
             #msg back to users
             msg_str = "{} is active. \nUse `gamebot end season` to end this season.".format(active_season)
+            add_log(message)
             message.reply(msg_str,in_thread=True)
 
         @listen_to('^gamebot end season',re.IGNORECASE)
@@ -185,6 +188,7 @@ class Command(BaseCommand):
 
             #msg back to users
             msg_str = "{} ended.\n\n {} opened".format(active_season,new_season)
+            add_log(message)
             message.reply(msg_str,in_thread=True)
 
         @respond_to('^gb global history',re.IGNORECASE)
@@ -196,8 +200,10 @@ class Command(BaseCommand):
             history_str = "\n".join(list( [ "* " + str(game) for game in Game.objects.order_by('-created_on')[:HISTORY_SIZE_LIMIT] ]  ))
             if history_str:
                 history_str = "History for last {} games: \n\n{}".format(str(HISTORY_SIZE_LIMIT),history_str)
+                add_log(message)
                 message.reply(history_str, in_thread=True)
             else:
+                add_log(message)
                 message.reply('No history found.',in_thread=True)
 
         @respond_to('^gb (<@.*) history',re.IGNORECASE)
@@ -236,8 +242,10 @@ class Command(BaseCommand):
             if history_str:
                 history_str = "History for {}'s last {} games: \n\n{}".format(user,str(HISTORY_SIZE_LIMIT),history_str)
                 full_message = history_str+this_message+elo_message
+                add_log(message)
                 message.reply(full_message, in_thread=True)
             else:
+                add_log(message)
                 message.reply('No history found',in_thread=True)
 
             # message.reply(this_message, in_thread=True)
@@ -257,6 +265,7 @@ class Command(BaseCommand):
 
             #send response
             this_message = "{}, {} challenged you to a game!. Accept like this: `{}` \n\n{}".format(opponentname,sender,accept_message,gifurl)
+            add_log(message)
             message.reply(this_message,in_thread=True)
 
         @listen_to('^gb taunt (.*)',re.IGNORECASE)
@@ -272,6 +281,7 @@ class Command(BaseCommand):
 
             #send response
             this_message = "{}, {} taunted you {}".format(opponentname,sender,gifurl)
+            add_log(message)
             message.reply(this_message,in_thread=True)
 
         @listen_to('^gb predict (.*)',re.IGNORECASE)
@@ -290,6 +300,7 @@ class Command(BaseCommand):
             games = (Game.objects.filter(created_on__gt=range_start_date,winner=sender,loser=opponentname)) | (Game.objects.filter(created_on__gt=range_start_date,winner=opponentname,loser=sender))
             games = games.order_by('-created_on')
             if not games:
+                add_log(message)
                 message.reply("No games found between {} and {}".format(sender,opponentname),in_thread=True)
                 return;
 
@@ -328,7 +339,7 @@ class Command(BaseCommand):
                             if longest_streak is None:
                                 longest_streak = "{}:{}".format(streak_char,streak_size)
                 this_message = this_message + "\nTrend: " + trend + ( ". Longest streak: {}".format(longest_streak) if longest_streak else "" )
-
+            add_log(message)
             message.reply(this_message,in_thread=True)
 
 
@@ -343,6 +354,7 @@ class Command(BaseCommand):
 
             #send response
             this_message = "{}, {} accepted your challenge! \n\n{}".format(opponentname,sender,gifurl)
+            add_log(message)
             message.reply(this_message,in_thread=True)
 
 
@@ -409,6 +421,7 @@ class Command(BaseCommand):
             player = _get_user_username(message,user)
 
             elo = get_stats(player).ranking
+            add_log(message)
             message.reply("{}'s elo ranking is {}".format(player,elo),in_thread=True)
 
 ########## DEBUGGING TOOL ONLY ##########
@@ -530,7 +543,6 @@ class Command(BaseCommand):
             logging.debug("DEBUG: opponent: {}, wins: {}, losses: {}".format(opponentname,wins,losses))
             wins = int(wins)
             losses = int(losses)
-            message.react("white_check_mark")
 
             sender = _get_sender_username(message)
             opponent = _get_user_username(message,opponentname)
@@ -563,6 +575,8 @@ class Command(BaseCommand):
             opponent_leaderboard = truncated_leaderboard(opponent)
             results_str = results_str+sender_leaderboard+"\n\n"+opponent_leaderboard
 
+            add_log(message)
+            message.react("white_check_mark")
             if wins == 1 and losses != 1:
                 str = "Recorded {} win and {} losses against {}\n\n".format(wins,losses,opponentname)
                 message.reply(str+results_str,in_thread=True)
@@ -584,6 +598,7 @@ class Command(BaseCommand):
         @listen_to('^gb doubles leaderboard',re.IGNORECASE)
         def doubles_leaderboard(message):
             team_stats_str = doubles_rankings()
+            add_log(message)
             message.reply(team_stats_str,in_thread=True)
 
         def doubles_rankings():
@@ -712,6 +727,7 @@ class Command(BaseCommand):
 
             wins = int(wins)
             losses = int(losses)
+            add_log(message)
             message.react("white_check_mark")
             if wins == 1 and losses != 1:
                 message.reply("Recorded {} win and {} losses between {} and {}".format(wins,losses,team1['name'],team2['name']),in_thread=True)
@@ -757,7 +773,7 @@ class Command(BaseCommand):
             user_list.remove(sender)
 
             opponent = choice(user_list)
-
+            add_log(message)
             message.reply("{}, you should play {} next! \n Do you want to challenge them? Type `pb challenge {}`".format(sender,opponent,opponent),in_thread=True)
 
 #########
