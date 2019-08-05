@@ -473,10 +473,6 @@ class Command(BaseCommand):
             return stats_str
 ##########
 
-        @respond_to('^gb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
-        @respond_to('^gb results (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
-        @respond_to('^gb result (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
-        @respond_to('^gb results (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
         @listen_to('^gb result (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
         @listen_to('^gb results (<@.*) ([0-9]+)-([0-9]+)',re.IGNORECASE)
         @listen_to('^gb result (<@.*) ([0-9]+) ([0-9]+)',re.IGNORECASE)
@@ -669,7 +665,6 @@ class Command(BaseCommand):
 
             return winning_team, losing_team
 
-        @respond_to('^gb doubles (<@.*) ([0-9]+)-([0-9]+) (<@.*) (<@.*)',re.IGNORECASE)
         @listen_to('^gb doubles (<@.*) ([0-9]+)-([0-9]+) (<@.*) (<@.*)',re.IGNORECASE)
         def record_doubles(message, partner, wins, losses, opponent1, opponent2):
 
