@@ -65,6 +65,21 @@ class Command(BaseCommand):
             gifurl = random.choice (gifs)
             return gifurl
 
+        def get_content(message):
+            match = re.search("<@U.*>", message.body['text'])
+            if not match:
+                return message.body['text']
+            else:
+                user = match.group(0).replace('@','').replace('<','').replace('>','').strip()
+                display_name = str(message.channel._client.users[user]['profile']['display_name'])
+                if not display_name:
+                    username = '@' + str(message.channel._client.users[user]['profile']['real_name'])
+                else:
+                    username = '@' + str(message.channel._client.users[user]['profile']['display_name'])
+
+                content = re.sub("<@U.*>",username,message.body['text'])
+                return content
+
         def add_log(message):
             base_link = 'https://zoox.slack.com/archives/'
             ts = message._body['event_ts'].replace('.','')
@@ -74,7 +89,8 @@ class Command(BaseCommand):
 
             time = current_time()
             requester = _get_sender_username(message)
-            content = message.body['text']
+            content = get_content(message)
+
             Logs.objects.get_or_create(created_on=time,requester=requester,log_message=content,slack_link=link)[0]
 
 
