@@ -37,7 +37,7 @@ class Command(BaseCommand):
                     logging.debug("DEBUG real_name: {}".format(opponentname))
                 else:
                     opponentname = '@' + str(message.channel._client.users[opp_userid]['profile']['display_name'])
-                    logging.debug("DEBUG display_name: {}".format(opponentname))
+                    logging.debug("DEBUG: user display_name: {}".format(opponentname))
             else:
                 opponentname = opponentname if opponentname.find('@') != -1 else '@' + opponentname
                 logging.debug("DEBUG: not using opp_user_id, opponent: {}".format(opponentname))
@@ -48,10 +48,10 @@ class Command(BaseCommand):
             display_name = str(message.channel._client.users[message.body['user']]['profile']['display_name'])
             if not display_name:
                 sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['real_name'])
-                logging.debug("DEBUG real_name: {}".format(sender))
+                logging.debug("DEBUG: sender real_name: {}".format(sender))
             else:
                 sender = "@" + str(message.channel._client.users[message.body['user']]['profile']['display_name'])
-                logging.debug("DEBUG display_name: {}".format(sender))
+                logging.debug("DEBUG: sender display_name: {}".format(sender))
 
             return sender.lower()
 
