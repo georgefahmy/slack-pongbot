@@ -66,19 +66,27 @@ class Command(BaseCommand):
             return gifurl
 
         def get_content(message):
-            match = re.search("<@U.*>", message.body['text'])
-            if not match:
-                return message.body['text']
-            else:
-                user = match.group(0).replace('@','').replace('<','').replace('>','').strip()
-                display_name = str(message.channel._client.users[user]['profile']['display_name'])
-                if not display_name:
-                    username = '@' + str(message.channel._client.users[user]['profile']['real_name'])
-                else:
-                    username = '@' + str(message.channel._client.users[user]['profile']['display_name'])
 
-                content = re.sub("<@U.*>",username,message.body['text'])
-                return content
+            doubles = re.search("doubles",message.body['text'])
+            if not doubles:
+                match = re.search("<@U.*>", message.body['text'])
+
+                if not match:
+                    return message.body['text']
+                else:
+                    user = match.group(0).replace('@','').replace('<','').replace('>','').strip()
+                    display_name = str(message.channel._client.users[user]['profile']['display_name'])
+                    if not display_name:
+                        username = '@' + str(message.channel._client.users[user]['profile']['real_name'])
+                    else:
+                        username = '@' + str(message.channel._client.users[user]['profile']['display_name'])
+
+                    content = re.sub("<@U.*>",username,message.body['text'])
+                    return content
+            else:
+                return message.body['text']
+
+
 
         def add_log(message):
             base_link = 'https://zoox.slack.com/archives/'
