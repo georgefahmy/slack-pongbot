@@ -108,9 +108,6 @@ class Command(BaseCommand):
         def help(message):
             help_message="Hello! I'm Gamebot, I'll track your Ping-pong statistics.  Here's how to use me: \n\n"+\
                 " _Play_: \n" +\
-                "    `gb challenge <@opponent>` -- challenges @opponent to a friendly game of Ping-pong \n" +\
-                "    `gb taunt <@opponent> ` -- taunt @opponent \n" +\
-                "    `gb accept <@opponent>` -- accepts a challenge \n" +\
                 "    `gb result <@opponent> <wins> - <losses>` -- records the results against a single opponent (e.g. `gb result @johndoe 3-2`) \n" +\
                 "    `gb predict <@opponent>` -- predict the outcome of a game between you and @opponent \n" +\
                 "    `gb who next` -- randomly selects someone for you to play \n\n" +\
@@ -136,9 +133,10 @@ class Command(BaseCommand):
         @listen_to('^gamebot version', re.IGNORECASE)
         @listen_to('^gb version', re.IGNORECASE)
         def version(message):
-            version_message="Version 2.1 \n\n"+\
+            version_message="Version 2.2 \n\n"+\
                 " Version history \n" +\
-                " * `2.1` -- update `gb results...` to display leaderboard information . \n" +\
+                " * `2.2` -- remove `gb taunt`, `gb challenge` and `gb accept` as they were not opp_userid. \n" +\
+                " * `2.1` -- update `gb results...` to display leaderboard information. \n" +\
                 " * `2.0` -- add support for doubles matches!. \n" +\
                 " * `1.4.1` -- add individual elo ranking message. \n" +\
                 " * `1.4` -- gamebot first release for use. \n" +\
@@ -276,37 +274,50 @@ class Command(BaseCommand):
             #
             # message.reply("{}'s elo ranking is {}.".format(user,player_elo),in_thread=True)
 
-        @listen_to('^gb challenge (.*)',re.IGNORECASE)
-        @listen_to('^gamebot challenge (.*)',re.IGNORECASE)
-        def challenge(message,opponentname):
-            #setup
-            sender = _get_sender_username(message)
-            opponentname = _get_user_username(message,opponentname)
+        # @listen_to('^gb challenge (.*)',re.IGNORECASE)
+        # @listen_to('^gamebot challenge (.*)',re.IGNORECASE)
+        # def challenge(message,opponentname):
+        #     #setup
+        #     sender = _get_sender_username(message)
+        #     opponentname = _get_user_username(message,opponentname)
+        #
+        #     #body
+        #     accept_message = "gb accept {}".format(sender)
+        #     gifurl = get_gif('challenge')
+        #
+        #     #send response
+        #     this_message = "{}, {} challenged you to a game!. Accept like this: `{}` \n\n{}".format(opponentname,sender,accept_message,gifurl)
+        #     add_log(message)
+        #     message.reply(this_message,in_thread=True)
 
-            #body
-            accept_message = "gb accept {}".format(sender)
-            gifurl = get_gif('challenge')
-
-            #send response
-            this_message = "{}, {} challenged you to a game!. Accept like this: `{}` \n\n{}".format(opponentname,sender,accept_message,gifurl)
-            add_log(message)
-            message.reply(this_message,in_thread=True)
-
-        @listen_to('^gb taunt (.*)',re.IGNORECASE)
-        @listen_to('^gamebot taunt (.*)',re.IGNORECASE)
-        def taunt(message,opponentname):
-
-            #setup
-            sender = _get_sender_username(message)
-            opponentname = _get_user_username(message,opponentname)
-
-            #body
-            gifurl = get_gif('taunt')
-
-            #send response
-            this_message = "{}, {} taunted you {}".format(opponentname,sender,gifurl)
-            add_log(message)
-            message.reply(this_message,in_thread=True)
+        # @listen_to('^gb taunt (.*)',re.IGNORECASE)
+        # @listen_to('^gamebot taunt (.*)',re.IGNORECASE)
+        # def taunt(message,opponentname):
+        #
+        #     #setup
+        #     sender = _get_sender_username(message)
+        #     opponentname = _get_user_username(message,opponentname)
+        #
+        #     #body
+        #     gifurl = get_gif('taunt')
+        #
+        #     #send response
+        #     this_message = "{}, {} taunted you {}".format(opponentname,sender,gifurl)
+        #     add_log(message)
+        #     message.reply(this_message,in_thread=True)
+        # @listen_to('^gb accept (.*)',re.IGNORECASE)
+        # @listen_to('^gamebot accept (.*)',re.IGNORECASE)
+        # def accepted(message,opponentname):
+        #     #setup
+        #     sender = _get_sender_username(message)
+        #     opponentname = _get_user_username(message,opponentname)
+        #
+        #     gifurl = get_gif('accepted')
+        #
+        #     #send response
+        #     this_message = "{}, {} accepted your challenge! \n\n{}".format(opponentname,sender,gifurl)
+        #     add_log(message)
+        #     message.reply(this_message,in_thread=True)
 
         @listen_to('^gb predict (.*)',re.IGNORECASE)
         @listen_to('^gamebot predict (.*)',re.IGNORECASE)
@@ -365,22 +376,6 @@ class Command(BaseCommand):
                 this_message = this_message + "\nTrend: " + trend + ( ". Longest streak: {}".format(longest_streak) if longest_streak else "" )
             add_log(message)
             message.reply(this_message,in_thread=True)
-
-
-        @listen_to('^gb accept (.*)',re.IGNORECASE)
-        @listen_to('^gamebot accept (.*)',re.IGNORECASE)
-        def accepted(message,opponentname):
-            #setup
-            sender = _get_sender_username(message)
-            opponentname = _get_user_username(message,opponentname)
-
-            gifurl = get_gif('accepted')
-
-            #send response
-            this_message = "{}, {} accepted your challenge! \n\n{}".format(opponentname,sender,gifurl)
-            add_log(message)
-            message.reply(this_message,in_thread=True)
-
 
 ##########
         def get_stats(user):
