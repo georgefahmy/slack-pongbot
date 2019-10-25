@@ -203,7 +203,7 @@ class Command(BaseCommand):
             active_season.save()
 
             #start new season
-            new_season = Season.objects.create(start_on = datetime.now(),active=True)
+            new_season = Season.objects.create(gamename = 'table-tennis',start_on = datetime.now(),active=True)
             num_seasons_before = Season.objects.filter(pk__lt=new_season.pk).count()
             new_season.season_number = num_seasons_before + 1
             new_season.save()
